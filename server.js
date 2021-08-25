@@ -92,6 +92,7 @@ require('./app/routesMultimedia.js')(app, connection, passport);
 require('./app/routesModules.js')(app, connection, passport);
 require('./app/routesNoticias.js')(app, connection, passport);
 require('./app/routesPersonal.js')(app, connection, passport);
+require('./app/routesHospital.js')(app, connection, passport);
 //require('./app/routesVideoteca.js')(app, connection, passport);
 
 /////////////////////
