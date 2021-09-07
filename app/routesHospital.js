@@ -243,4 +243,182 @@ module.exports = function (app,connection, passport) {
 		}
 	});
 
+	/********************************* */
+    /*CLASES*/
+    /********************************* */
+
+    app.get('/list-clases', isLoggedIn, checkConnection, function (req, res) {
+        connection.query("SELECT * FROM clases WHERE estado = 1 ORDER BY descripcion", function (err, result) {
+            if (err) return res.json({ success: 0, error_msj: err });
+            res.json({ success: 1, result });
+        });
+    });
+
+    app.post('/insert-clases', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [105], connection) }, function (req, res) {
+		var arrayIns = [req.body.descripcion, 1];
+		connection.query("CALL clases_insertar(?)",  [arrayIns], function (err, result) {
+			if (err) return res.json({ success: 0, error_msj: err.message, err });
+			res.json({ success: 1, result });
+		})
+	});
+
+    app.post('/delete-clase', bodyJson, checkConnection, function (req, res) {
+		if (req.body.id) {
+			var id = parseInt(req.body.id);
+			var objectoUpdate = { estado: 0 };
+			connection.query("UPDATE clases SET ? where id = ?", [objectoUpdate, id], function (err, result) {
+				if (err) return res.json({ success: 0, error_msj: "ha ocurrido un error al intentar actualizar la tabla de clases", err });
+				res.json({ success: 1, result });
+			});
+
+		} else {
+			res.json({ success: 0, error_msj: "el id de la tabla clases no esta ingresado" })
+
+		}
+	});
+
+    app.get('/list-clases/:id', checkConnection, function (req, res) {
+		var id = req.params.id;
+		connection.query("SELECT * FROM clases WHERE id = ? AND estado > 0", [id], function (err, result) {
+			if (err) return res.json({ success: 0, error_msj: err });
+			res.json({ success: 1, result });
+		});
+	});
+
+	app.post('/update-clase', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [105], connection) }, function (req, res) {
+		if (req.body.id) {
+			let id = req.body.id || null;
+			let descripcion = req.body.descripcion || null;
+
+			let arrayIns = [id, descripcion];
+			connection.query("CALL clases_update(?)",  [arrayIns], function (err, result) {
+				if (err) return res.json({ success: 0, error_msj: err.message, err });
+				res.json({ success: 1, result });
+			})
+		} else {
+			res.json({ success: 0, error_msj: "el id de la tabla de clases no esta ingresado" })
+
+		}
+	});
+
+	/********************************* */
+    /*ESPECIES*/
+    /********************************* */
+
+    app.get('/list-especies', isLoggedIn, checkConnection, function (req, res) {
+        connection.query("SELECT e.*, c.descripcion as 'nombreclase' FROM especies e INNER JOIN clases c ON c.id = e.id_clase WHERE e.estado = 1  ORDER BY e.descripcion", function (err, result) {
+            if (err) return res.json({ success: 0, error_msj: err });
+            res.json({ success: 1, result });
+        });
+    });
+
+    app.post('/insert-especies', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [103], connection) }, function (req, res) {
+		let id_clase = req.body.id_clase || null;
+		var arrayIns = [req.body.descripcion, id_clase, 1];
+		connection.query("CALL especies_insertar(?)",  [arrayIns], function (err, result) {
+			if (err) return res.json({ success: 0, error_msj: err.message, err });
+			res.json({ success: 1, result });
+		})
+	});
+
+    app.post('/delete-especie', bodyJson, checkConnection, function (req, res) {
+		if (req.body.id) {
+			var id = parseInt(req.body.id);
+			var objectoUpdate = { estado: 0 };
+			connection.query("UPDATE especies SET ? where id = ?", [objectoUpdate, id], function (err, result) {
+				if (err) return res.json({ success: 0, error_msj: "ha ocurrido un error al intentar actualizar la tabla de especies", err });
+				res.json({ success: 1, result });
+			});
+
+		} else {
+			res.json({ success: 0, error_msj: "el id de la tabla especies no esta ingresado" })
+
+		}
+	});
+
+    app.get('/list-especies/:id', checkConnection, function (req, res) {
+		var id = req.params.id;
+		connection.query("SELECT * FROM especies WHERE id = ? AND estado > 0", [id], function (err, result) {
+			if (err) return res.json({ success: 0, error_msj: err });
+			res.json({ success: 1, result });
+		});
+	});
+
+	app.post('/update-especie', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [103], connection) }, function (req, res) {
+		if (req.body.id) {
+			let id = req.body.id || null;
+			let descripcion = req.body.descripcion || null;
+			let id_clase = req.body.id_clase || null;
+
+			let arrayIns = [id, descripcion, id_clase];
+			connection.query("CALL especies_update(?)",  [arrayIns], function (err, result) {
+				if (err) return res.json({ success: 0, error_msj: err.message, err });
+				res.json({ success: 1, result });
+			})
+		} else {
+			res.json({ success: 0, error_msj: "el id de la tabla de especies no esta ingresado" })
+
+		}
+	});
+
+	/********************************* */
+    /*RAZAS*/
+    /********************************* */
+
+    app.get('/list-razas', isLoggedIn, checkConnection, function (req, res) {
+        connection.query("SELECT r.*, e.descripcion as 'nombreespecie' FROM razas r INNER JOIN especies e ON e.id = r.id_especie WHERE r.estado = 1  ORDER BY r.descripcion", function (err, result) {
+            if (err) return res.json({ success: 0, error_msj: err });
+            res.json({ success: 1, result });
+        });
+    });
+
+    app.post('/insert-razas', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [103], connection) }, function (req, res) {
+		let id_especie = req.body.id_especie || null;
+		var arrayIns = [req.body.descripcion, id_especie, 1];
+		connection.query("CALL razas_insertar(?)",  [arrayIns], function (err, result) {
+			if (err) return res.json({ success: 0, error_msj: err.message, err });
+			res.json({ success: 1, result });
+		})
+	});
+
+    app.post('/delete-raza', bodyJson, checkConnection, function (req, res) {
+		if (req.body.id) {
+			var id = parseInt(req.body.id);
+			var objectoUpdate = { estado: 0 };
+			connection.query("UPDATE razas SET ? where id = ?", [objectoUpdate, id], function (err, result) {
+				if (err) return res.json({ success: 0, error_msj: "ha ocurrido un error al intentar actualizar la tabla de razas", err });
+				res.json({ success: 1, result });
+			});
+
+		} else {
+			res.json({ success: 0, error_msj: "el id de la tabla razas no esta ingresado" })
+
+		}
+	});
+
+    app.get('/list-razas/:id', checkConnection, function (req, res) {
+		var id = req.params.id;
+		connection.query("SELECT * FROM razas WHERE id = ? AND estado > 0", [id], function (err, result) {
+			if (err) return res.json({ success: 0, error_msj: err });
+			res.json({ success: 1, result });
+		});
+	});
+
+	app.post('/update-raza', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [103], connection) }, function (req, res) {
+		if (req.body.id) {
+			let id = req.body.id || null;
+			let descripcion = req.body.descripcion || null;
+			let id_especie = req.body.id_especie || null;
+
+			let arrayIns = [id, descripcion, id_especie];
+			connection.query("CALL razas_update(?)",  [arrayIns], function (err, result) {
+				if (err) return res.json({ success: 0, error_msj: err.message, err });
+				res.json({ success: 1, result });
+			})
+		} else {
+			res.json({ success: 0, error_msj: "el id de la tabla de razas no esta ingresado" })
+
+		}
+	});
+
 }
