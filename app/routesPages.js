@@ -56,7 +56,7 @@ module.exports = function (app, connection, passport) {
       app.post('/insert-page',bodyJson, function (req, res) {
 
         try {
-          connection.query("CALL pages_insert(?)",[[req.body.nombre,req.body.descripcion]], function (err, result) {
+          connection.query("CALL pages_insert(?)",[[req.body.nombre,req.body.descripcion,req.body.uri]], function (err, result) {
             if (err) return res.status(500).send(err.sqlMessage);
             
             res.json({ success: 1, result });
@@ -71,7 +71,7 @@ module.exports = function (app, connection, passport) {
       app.post('/update-page',bodyJson, function (req, res) {
 
         try {
-          connection.query("CALL pages_update(?)",[[req.body.id,req.body.nombre,req.body.descripcion]], function (err, result) {
+          connection.query("CALL pages_update(?)",[[req.body.id,req.body.nombre,req.body.descripcion,req.body.uri]], function (err, result) {
             if (err) return res.status(500).send(err.sqlMessage);
             
             res.json({ success: 1, result });
