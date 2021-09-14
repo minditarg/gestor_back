@@ -432,7 +432,7 @@ module.exports = function (app,connection, passport) {
         });
     });
 
-    app.post('/insert-patologias', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [105], connection) }, function (req, res) {
+    app.post('/insert-patologias', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [106], connection) }, function (req, res) {
 		var arrayIns = [req.body.descripcion, 1];
 		connection.query("CALL patologias_insertar(?)",  [arrayIns], function (err, result) {
 			if (err) return res.json({ success: 0, error_msj: err.message, err });
@@ -463,7 +463,7 @@ module.exports = function (app,connection, passport) {
 		});
 	});
 
-	app.post('/update-patologia', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [105], connection) }, function (req, res) {
+	app.post('/update-patologia', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [106], connection) }, function (req, res) {
 		if (req.body.id) {
 			let id = req.body.id || null;
 			let descripcion = req.body.descripcion || null;
@@ -475,6 +475,65 @@ module.exports = function (app,connection, passport) {
 			})
 		} else {
 			res.json({ success: 0, error_msj: "el id de la tabla de patologias no esta ingresado" })
+
+		}
+	});
+
+	/********************************* */
+    /*SERVICIOS*/
+    /********************************* */
+
+    app.get('/list-servicios', isLoggedIn, checkConnection, function (req, res) {
+        connection.query("SELECT * FROM servicios WHERE estado = 1 ORDER BY codigo", function (err, result) {
+            if (err) return res.json({ success: 0, error_msj: err });
+            res.json({ success: 1, result });
+        });
+    });
+
+    app.post('/insert-servicios', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [107], connection) }, function (req, res) {
+		var arrayIns = [req.body.codigo, req.body.descripcion, 1];
+		connection.query("CALL servicios_insertar(?)",  [arrayIns], function (err, result) {
+			if (err) return res.json({ success: 0, error_msj: err.message, err });
+			res.json({ success: 1, result });
+		})
+	});
+
+    app.post('/delete-servicio', bodyJson, checkConnection, function (req, res) {
+		if (req.body.id) {
+			var id = parseInt(req.body.id);
+			var objectoUpdate = { estado: 0 };
+			connection.query("UPDATE servicios SET ? where id = ?", [objectoUpdate, id], function (err, result) {
+				if (err) return res.json({ success: 0, error_msj: "ha ocurrido un error al intentar actualizar la tabla de servicios", err });
+				res.json({ success: 1, result });
+			});
+
+		} else {
+			res.json({ success: 0, error_msj: "el id de la tabla servicios no esta ingresado" })
+
+		}
+	});
+
+    app.get('/list-servicios/:id', checkConnection, function (req, res) {
+		var id = req.params.id;
+		connection.query("SELECT * FROM servicios WHERE id = ? AND estado > 0", [id], function (err, result) {
+			if (err) return res.json({ success: 0, error_msj: err });
+			res.json({ success: 1, result });
+		});
+	});
+
+	app.post('/update-servicio', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [107], connection) }, function (req, res) {
+		if (req.body.id) {
+			let id = req.body.id || null;
+			let codigo = req.body.codigo || null;
+			let descripcion = req.body.descripcion || null;
+
+			let arrayIns = [id, codigo, descripcion];
+			connection.query("CALL servicios_update(?)",  [arrayIns], function (err, result) {
+				if (err) return res.json({ success: 0, error_msj: err.message, err });
+				res.json({ success: 1, result });
+			})
+		} else {
+			res.json({ success: 0, error_msj: "el id de la tabla de servicios no esta ingresado" })
 
 		}
 	});
