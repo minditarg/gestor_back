@@ -538,4 +538,206 @@ module.exports = function (app,connection, passport) {
 		}
 	});
 
+	/********************************* */
+    /*CONSULTAS*/
+    /********************************* */
+
+    app.get('/list-consultas', isLoggedIn, checkConnection, function (req, res) {
+        connection.query("CALL consultas_listar()", function (err, result) {
+            if (err) return res.json({ success: 0, error_msj: err });
+            res.json({ success: 1, result });
+			
+        });
+    });
+
+    app.post('/insert-consultas', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [107], connection) }, function (req, res) {
+		let id_paciente = req.body.idPaciente || null;
+		let id_servicio = req.body.id_servicio || null;
+		var arrayIns = [id_paciente, id_servicio, req.body.temperatura, req.body.peso, req.body.consulta, req.body.fecha, 1];
+		connection.query("CALL consultas_insertar(?)",  [arrayIns], function (err, result) {
+			if (err) return res.json({ success: 0, error_msj: err.message, err });
+			res.json({ success: 1, result });
+		})
+	});
+
+	app.get('/list-servicio', checkConnection, function (req, res) {
+
+		connection.query("SELECT * FROM servicios WHERE estado = 1 ORDER BY codigo", function (err, result) {
+			if (err) {
+				return res.json({ success: 0, error_msj: err });
+			}
+			else {
+
+				res.json({ success: 1, result });
+			}
+		})
+	});
+
+	app.get('/list-paciente/:idPaciente', checkConnection, function (req, res) {
+
+		var idPaciente = req.params.idPaciente;
+		connection.query("SELECT * FROM pacientes WHERE id = ? AND estado > 0", [idPaciente], function (err, result) {
+			if (err) return res.json({ success: 0, error_msj: err });
+			res.json({ success: 1, result });
+		});
+	});
+
+    app.post('/delete-consulta', bodyJson, checkConnection, function (req, res) {
+		if (req.body.id) {
+			var id = parseInt(req.body.id);
+			var objectoUpdate = { estado: 0 };
+			connection.query("UPDATE consultas SET ? where id = ?", [objectoUpdate, id], function (err, result) {
+				if (err) return res.json({ success: 0, error_msj: "ha ocurrido un error al intentar actualizar la tabla de consultas", err });
+				res.json({ success: 1, result });
+			});
+
+		} else {
+			res.json({ success: 0, error_msj: "el id de la tabla consultas no esta ingresado" })
+
+		}
+	});
+
+    app.get('/list-consultas/:id', checkConnection, function (req, res) {
+		var id = req.params.id;
+		connection.query("SELECT * FROM consultas WHERE id = ? AND estado > 0", [id], function (err, result) {
+			if (err) return res.json({ success: 0, error_msj: err });
+			res.json({ success: 1, result });
+		});
+	});
+
+	app.post('/update-consulta', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [107], connection) }, function (req, res) {
+		if (req.body.id) {
+			let id = req.body.id || null;
+			let id_servicio = req.body.id_servicio || null;
+			let temperatura = req.body.temperatura || null;
+			let peso = req.body.peso || null;
+			let consulta = req.body.consulta || null;
+			let fecha = req.body.fecha || null;
+
+			let arrayIns = [id, id_servicio, temperatura, peso, consulta, fecha];
+			connection.query("CALL consultas_update(?)",  [arrayIns], function (err, result) {
+				if (err) return res.json({ success: 0, error_msj: err.message, err });
+				res.json({ success: 1, result });
+			})
+		} else {
+			res.json({ success: 0, error_msj: "el id de la tabla de consultas no esta ingresado" })
+
+		}
+	});
+
+	app.post('/insert-archivo-consulta/:id/:nombre_foto', function (req, res) {
+
+		var id = req.params.id;
+		var nombre_foto = req.params.nombre_foto;
+
+		var multer = require('multer');
+		var storage = multer.diskStorage({
+			destination: function (req, file, callback) {
+
+				callback(null, './' + process.env.UPLOAD_PATH + '/archivos/consulta/' + id);
+			},
+			filename: function (req, file, callback) {
+				console.log(file);
+				callback(null, file.originalname);
+			}
+		});
+		var upload = multer({ storage: storage }).single('archivo');
+
+		console.log(req);
+		mkdirp.sync(path.join(__dirname, '../' + process.env.UPLOAD_PATH + '/archivos/consulta/' + id));
+
+
+		upload(req, res, function (err) {
+			if (err) return res.status(500).send(err);
+
+
+			if (req.params.id) {
+				var id = parseInt(req.params.id);
+				var objectoUpdate = { archivo: path.join('/' + process.env.UPLOAD_PATH + '/archivos/consulta/' + id + "/" + nombre_foto) };
+				connection.query("UPDATE consultas SET ? where id = ?", [objectoUpdate, id], function (err, result) {
+
+					if (err) return res.json({ success: 0, error_msj: "ha ocurrido un error al intentar modificar los datos de la operacion", err });
+					res.json({ success: 1, result });
+				})
+			} else {
+				res.json({ success: 0, error_msj: "el id de la tabla operaciones no esta ingresado" })
+			}
+
+		});
+
+
+	});
+
+	app.post('/delete-archivo-consulta', bodyJson, checkConnection, function (req, res) {
+
+		if (req.body.id) {
+			var id = parseInt(req.body.id);
+			var objectoUpdate = { archivo: null };
+			connection.query("UPDATE consultas SET ? where id = ?", [objectoUpdate, id], function (err, result) {
+				if (err) return res.json({ success: 0, error_msj: "ha ocurrido un error al intentar actualizar la tabla de operaciones", err });
+				res.json({ success: 1, result });
+			});
+		} else {
+			res.json({ success: 0, error_msj: "el id de la tabla de operaciones no esta ingresado" })
+		}
+	});
+
+	app.post('/insert-archivo-new-consulta/:id/:nombre_foto', function (req, res) {
+		console.log("ID:" + req.params.id);
+		var id = req.params.id || 0;
+		var nombre_foto = req.params.nombre_foto;
+		if (id == "undefined")
+		{
+			console.log("ID:" + id);
+			var id = 0;
+			console.log("ID:" + id);
+		}
+		var multer = require('multer');
+		var storage = multer.diskStorage({
+			destination: function (req, file, callback) {
+
+				callback(null, './' + process.env.UPLOAD_PATH + '/archivos/consulta/' + id);
+			},
+			filename: function (req, file, callback) {
+				console.log(file);
+				callback(null, file.originalname);
+			}
+		});
+		var upload = multer({ storage: storage }).single('archivo');
+
+		console.log(req);
+		mkdirp.sync(path.join(__dirname, '../' + process.env.UPLOAD_PATH + '/archivos/consulta/' + id));
+
+
+		upload(req, res, function (err) {
+			if (err) return res.status(500).send(err);
+
+
+			if (req.params.id) {
+				var id = parseInt(req.params.id) || 0;
+				//var objectoUpdate = { archivo: path.join('/' + process.env.UPLOAD_PATH + '/archivos/consulta/' + id + "/" + nombre_foto), estado: -1 };
+				var arrayIns = [path.join('/' + process.env.UPLOAD_PATH + '/archivos/consulta/' + id + "/" + nombre_foto), -1];
+				//connection.query("INSERT INTO consultas (archivo, estado) VALUES ? ", [objectoUpdate], function (err, result) {
+					connection.query("INSERT INTO consultas (archivo, estado) VALUES (?) ", [arrayIns], function (err, result) {
+					if (err) return res.json({ success: 0, error_msj: "ha ocurrido un error al intentar modificar los datos de la operacion", err });
+					res.json({ success: 1, result });
+				})
+			} else {
+				res.json({ success: 0, error_msj: "el id de la tabla operaciones no esta ingresado" })
+			}
+
+		});
+
+
+	});
+
+	app.post('/insert-consultas-archivo-subido', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [107], connection) }, function (req, res) {
+		let id_paciente = req.body.idPaciente || null;
+		let id_servicio = req.body.id_servicio || null;
+		var arrayIns = [id_paciente, id_servicio, req.body.temperatura, req.body.peso, req.body.consulta, req.body.fecha, 1];
+		connection.query("CALL consultas_con_archivo_insertar(?)",  [arrayIns], function (err, result) {
+			if (err) return res.json({ success: 0, error_msj: err.message, err });
+			res.json({ success: 1, result });
+		})
+	});
 }
