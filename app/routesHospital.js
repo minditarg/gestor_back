@@ -740,4 +740,22 @@ module.exports = function (app,connection, passport) {
 			res.json({ success: 1, result });
 		})
 	});
+
+	// app.get('/list-fichas', isLoggedIn, checkConnection, function (req, res) {
+    //     connection.query("CALL pacientes_listar()", function (err, result) {
+    //         if (err) return res.json({ success: 0, error_msj: err });
+    //         res.json({ success: 1, result });
+			
+    //     });
+    // });
+
+	app.get('/list-fichas', isLoggedIn, checkConnection, function (req, res) {
+        connection.query("CALL fichas_listar(2)", function (err, result) {
+            if (err) return res.json({ success: 0, error_msj: err });
+            res.json({ success: 1, result });
+			
+        });
+    });
+	
+
 }
