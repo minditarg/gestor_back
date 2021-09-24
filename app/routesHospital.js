@@ -749,6 +749,14 @@ module.exports = function (app,connection, passport) {
     //     });
     // });
 
+	app.get('/list-fichas/:id', checkConnection, function (req, res) {
+		var id = req.params.id;
+		connection.query("CALL fichas_listar(?)", [id], function (err, result) {
+			if (err) return res.json({ success: 0, error_msj: err });
+			res.json({ success: 1, result });
+		});
+	});
+/*
 	app.get('/list-fichas', isLoggedIn, checkConnection, function (req, res) {
         connection.query("CALL fichas_listar(2)", function (err, result) {
             if (err) return res.json({ success: 0, error_msj: err });
@@ -756,6 +764,6 @@ module.exports = function (app,connection, passport) {
 			
         });
     });
-	
+	*/
 
 }
