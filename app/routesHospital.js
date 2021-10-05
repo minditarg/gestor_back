@@ -742,14 +742,32 @@ module.exports = function (app,connection, passport) {
 	});
 
 	/********************************* */
-    /*FICHAS*/
+    /*CONSULTAS*/
     /********************************* */
 
+	// app.get('/list-fichas', isLoggedIn, checkConnection, function (req, res) {
+    //     connection.query("CALL pacientes_listar()", function (err, result) {
+    //         if (err) return res.json({ success: 0, error_msj: err });
+    //         res.json({ success: 1, result });
+			
+    //     });
+    // });
+
+	app.get('/list-fichas/:id', checkConnection, function (req, res) {
+		var id = req.params.id;
+		connection.query("CALL fichas_listar(?)", [id], function (err, result) {
+			if (err) return res.json({ success: 0, error_msj: err });
+			res.json({ success: 1, result });
+		});
+	});
+/*
 	app.get('/list-fichas', isLoggedIn, checkConnection, function (req, res) {
-        connection.query("CALL pacientes_listar()", function (err, result) {
+        connection.query("CALL fichas_listar(2)", function (err, result) {
             if (err) return res.json({ success: 0, error_msj: err });
             res.json({ success: 1, result });
 			
         });
     });
+	*/
+
 }
