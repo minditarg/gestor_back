@@ -37,7 +37,7 @@ module.exports = function (app,connection, passport) {
         });
     });
 
-    app.post('/insert-clientes', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [91], connection) }, function (req, res) {
+    app.post('/insert-clientes', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [101], connection) }, function (req, res) {
 		let id_tipo_cliente = req.body.id_tipo_cliente || null;
         var arrayIns = [req.body.nombre, req.body.apellido, req.body.dni, req.body.telefono, req.body.direccion, id_tipo_cliente, req.body.mail, 1];
 		connection.query("CALL clientes_insertar(?)",  [arrayIns], function (err, result) {
@@ -67,7 +67,7 @@ module.exports = function (app,connection, passport) {
 		});
 	});
 
-	app.post('/update-cliente', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [91], connection) }, function (req, res) {
+	app.post('/update-cliente', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [101], connection) }, function (req, res) {
 		if (req.body.id) {
 			let id = req.body.id || null;
 			let nombre = req.body.nombre || null;
@@ -116,7 +116,7 @@ module.exports = function (app,connection, passport) {
         });
     });
 
-    app.post('/insert-pacientes', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [91], connection) }, function (req, res) {
+    app.post('/insert-pacientes', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [102], connection) }, function (req, res) {
 		let id_cliente = req.body.id_cliente || null;
 		let id_clase = req.body.id_clase || null;
 		let id_especie = req.body.id_especie || null;
@@ -740,6 +740,10 @@ module.exports = function (app,connection, passport) {
 			res.json({ success: 1, result });
 		})
 	});
+
+	/********************************* */
+    /*CONSULTAS*/
+    /********************************* */
 
 	// app.get('/list-fichas', isLoggedIn, checkConnection, function (req, res) {
     //     connection.query("CALL pacientes_listar()", function (err, result) {
