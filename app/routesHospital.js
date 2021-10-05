@@ -770,4 +770,63 @@ module.exports = function (app,connection, passport) {
     });
 	*/
 
+	/********************************* */
+    /*SIGNOS Y SINTOMAS*/
+    /********************************* */
+
+    app.get('/list-signos', isLoggedIn, checkConnection, function (req, res) {
+        connection.query("SELECT * FROM signos_sintomas WHERE estado = 1 ORDER BY descripcion", function (err, result) {
+            if (err) return res.json({ success: 0, error_msj: err });
+            res.json({ success: 1, result });
+        });
+    });
+
+    app.post('/insert-signos', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [105], connection) }, function (req, res) {
+		var arrayIns = [req.body.descripcion, 1];
+		connection.query("CALL signos_sintomas_insertar(?)",  [arrayIns], function (err, result) {
+			if (err) return res.json({ success: 0, error_msj: err.message, err });
+			res.json({ success: 1, result });
+		})
+	});
+
+    app.post('/delete-signo', bodyJson, checkConnection, function (req, res) {
+		if (req.body.id) {
+			var id = parseInt(req.body.id);
+			var objectoUpdate = { estado: 0 };
+			connection.query("UPDATE signos_sintomas SET ? where id = ?", [objectoUpdate, id], function (err, result) {
+				if (err) return res.json({ success: 0, error_msj: "ha ocurrido un error al intentar actualizar la tabla de signos y sintomas", err });
+				res.json({ success: 1, result });
+			});
+
+		} else {
+			res.json({ success: 0, error_msj: "el id de la tabla signos y sintomas no esta ingresado" })
+
+		}
+	});
+
+    app.get('/list-signos/:id', checkConnection, function (req, res) {
+		var id = req.params.id;
+		connection.query("SELECT * FROM signos_sintomas WHERE id = ? AND estado > 0", [id], function (err, result) {
+			if (err) return res.json({ success: 0, error_msj: err });
+			res.json({ success: 1, result });
+		});
+	});
+
+	app.post('/update-signo', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [105], connection) }, function (req, res) {
+		if (req.body.id) {
+			let id = req.body.id || null;
+			let descripcion = req.body.descripcion || null;
+
+			let arrayIns = [id, descripcion];
+			connection.query("CALL signos_sintomas_update(?)",  [arrayIns], function (err, result) {
+				if (err) return res.json({ success: 0, error_msj: err.message, err });
+				res.json({ success: 1, result });
+			})
+		} else {
+			res.json({ success: 0, error_msj: "el id de la tabla de signos y sintomas no esta ingresado" })
+
+		}
+	});
+
+
 }
