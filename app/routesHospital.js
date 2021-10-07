@@ -122,7 +122,10 @@ module.exports = function (app,connection, passport) {
 		let id_especie = req.body.id_especie || null;
 		let id_raza = req.body.id_raza || null;
 		let id_sexo = req.body.id_sexo || null;
-        var arrayIns = [req.body.nombre, id_cliente, id_clase, id_especie, id_raza,  req.body.color, id_sexo, req.body.castrado, req.body.notas, req.body.fecha_nacimiento, req.body.fecha_adopcion, 1];
+		let id_alimentacion = req.body.id_alimentacion || null;
+		let id_habitos = req.body.id_habitos || null;
+		let id_mascotas = req.body.id_mascotas || null;
+        var arrayIns = [req.body.nombre, id_cliente, id_clase, id_especie, id_raza,  req.body.color, id_sexo, req.body.castrado, req.body.notas, req.body.fecha_nacimiento, req.body.fecha_adopcion, id_alimentacion, id_habitos, id_mascotas, 1];
 		connection.query("CALL pacientes_insertar(?)",  [arrayIns], function (err, result) {
 			if (err) return res.json({ success: 0, error_msj: err.message, err });
 			res.json({ success: 1, result });
@@ -216,8 +219,11 @@ module.exports = function (app,connection, passport) {
 			let notas = req.body.notas || null; 
 			let fecha_nacimiento = req.body.fecha_nacimiento || null; 
 			let fecha_adopcion = req.body.fecha_adopcion || null;
+			let id_alimentacion = req.body.id_alimentacion || null;
+			let id_habitos = req.body.id_habitos || null;
+			let id_mascotas = req.body.id_mascotas || null;
 
-			let arrayIns = [id, nombre, id_cliente, id_clase, id_especie, id_raza, color, id_sexo, castrado, notas, fecha_nacimiento, fecha_adopcion];
+			let arrayIns = [id, nombre, id_cliente, id_clase, id_especie, id_raza, color, id_sexo, castrado, notas, fecha_nacimiento, fecha_adopcion, id_alimentacion, id_habitos, id_mascotas];
 			connection.query("CALL pacientes_update(?)",  [arrayIns], function (err, result) {
 				if (err) return res.json({ success: 0, error_msj: err.message, err });
 				res.json({ success: 1, result });
@@ -241,6 +247,45 @@ module.exports = function (app,connection, passport) {
 			res.json({ success: 0, error_msj: "el id de la tabla clientes no esta ingresado" })
 
 		}
+	});
+
+	app.get('/list-alimentacion', checkConnection, function (req, res) {
+
+		connection.query("SELECT * FROM pacientes_alimentacion WHERE estado = 1 ORDER BY DESCRIPCION", function (err, result) {
+			if (err) {
+				return res.json({ success: 0, error_msj: err });
+			}
+			else {
+
+				res.json({ success: 1, result });
+			}
+		})
+	});
+
+	app.get('/list-habitos', checkConnection, function (req, res) {
+
+		connection.query("SELECT * FROM pacientes_habitos WHERE estado = 1 ORDER BY DESCRIPCION", function (err, result) {
+			if (err) {
+				return res.json({ success: 0, error_msj: err });
+			}
+			else {
+
+				res.json({ success: 1, result });
+			}
+		})
+	});
+
+	app.get('/list-mascotas', checkConnection, function (req, res) {
+
+		connection.query("SELECT * FROM pacientes_mascotas WHERE estado = 1 ORDER BY DESCRIPCION", function (err, result) {
+			if (err) {
+				return res.json({ success: 0, error_msj: err });
+			}
+			else {
+
+				res.json({ success: 1, result });
+			}
+		})
 	});
 
 	/********************************* */
