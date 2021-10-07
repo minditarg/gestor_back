@@ -426,14 +426,16 @@ module.exports = function (app,connection, passport) {
     /********************************* */
 
     app.get('/list-patologias', isLoggedIn, checkConnection, function (req, res) {
-        connection.query("SELECT * FROM patologias WHERE estado = 1 ORDER BY descripcion", function (err, result) {
+		connection.query("SELECT p.*, e.descripcion as 'nombreespecie' FROM patologias p INNER JOIN especies e ON e.id = p.id_especie WHERE p.estado = 1  ORDER BY p.descripcion", function (err, result) {
+        //connection.query("SELECT * FROM patologias WHERE estado = 1 ORDER BY descripcion", function (err, result) {
             if (err) return res.json({ success: 0, error_msj: err });
             res.json({ success: 1, result });
         });
     });
 
     app.post('/insert-patologias', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [106], connection) }, function (req, res) {
-		var arrayIns = [req.body.descripcion, 1];
+		let id_especie = req.body.id_especie || null;
+		var arrayIns = [req.body.descripcion, id_especie, 1];
 		connection.query("CALL patologias_insertar(?)",  [arrayIns], function (err, result) {
 			if (err) return res.json({ success: 0, error_msj: err.message, err });
 			res.json({ success: 1, result });
@@ -467,8 +469,9 @@ module.exports = function (app,connection, passport) {
 		if (req.body.id) {
 			let id = req.body.id || null;
 			let descripcion = req.body.descripcion || null;
+			let id_especie = req.body.id_especie || null;
 
-			let arrayIns = [id, descripcion];
+			let arrayIns = [id, descripcion, id_especie];
 			connection.query("CALL patologias_update(?)",  [arrayIns], function (err, result) {
 				if (err) return res.json({ success: 0, error_msj: err.message, err });
 				res.json({ success: 1, result });
