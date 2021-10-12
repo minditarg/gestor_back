@@ -36,6 +36,22 @@ module.exports = function (app, connection, passport) {
 
     });
 
+    app.get('/list-items-children/:idItem', function (req, res) {
+        let idItem = req.params.idItem || null;
+        console.log(idItem);
+        try {
+            connection.query("CALL items_list_children(?)",[[idItem]], function (err, result) {
+                if (err) return res.status(500).send(err);
+
+                res.json({ success: 1, result: result[0] });
+
+            })
+        } catch (e) {
+            return res.status(500).send(e.message)
+        }
+
+    });
+
     app.post('/order-items', bodyJson, function (req, res) {
         let arrayOrder = req.body.arrayOrder;
 
@@ -71,7 +87,7 @@ module.exports = function (app, connection, passport) {
     app.post('/insert-item', bodyJson, function (req, res) {
 
         try {
-            connection.query("CALL items_insert(?)", [[req.body.texto, req.body.enlace, req.body.id_page]], function (err, result) {
+            connection.query("CALL items_insert(?)", [[req.body.texto, req.body.enlace, req.body.id_page,req.body.id_item_menu]], function (err, result) {
                 if (err) return res.status(500).send(err.sqlMessage);
 
                 res.json({ success: 1, result });

@@ -37,10 +37,11 @@ module.exports = function (app, connection, passport) {
     
       });
 
-    app.get('/list-pages', function (req, res) {
-
+    app.get('/list-pages/tipo/:tipoPage', function (req, res) {
+        let tipoPage = req.params.tipoPage;
+        console.log(tipoPage);
         try {
-          connection.query("CALL pages_list", function (err, result) {
+          connection.query("CALL pages_list(?)",[[tipoPage]], function (err, result) {
             if (err) return res.status(500).send(err);
             
             res.json({ success: 1, result:result[0] });
@@ -56,7 +57,7 @@ module.exports = function (app, connection, passport) {
       app.post('/insert-page',bodyJson, function (req, res) {
 
         try {
-          connection.query("CALL pages_insert(?)",[[req.body.nombre,req.body.descripcion]], function (err, result) {
+          connection.query("CALL pages_insert(?)",[[req.body.nombre,req.body.descripcion,req.body.uri]], function (err, result) {
             if (err) return res.status(500).send(err.sqlMessage);
             
             res.json({ success: 1, result });
@@ -71,7 +72,7 @@ module.exports = function (app, connection, passport) {
       app.post('/update-page',bodyJson, function (req, res) {
 
         try {
-          connection.query("CALL pages_update(?)",[[req.body.id,req.body.nombre,req.body.descripcion]], function (err, result) {
+          connection.query("CALL pages_update(?)",[[req.body.id,req.body.nombre,req.body.descripcion,req.body.uri]], function (err, result) {
             if (err) return res.status(500).send(err.sqlMessage);
             
             res.json({ success: 1, result });
