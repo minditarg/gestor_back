@@ -39,7 +39,7 @@ module.exports = function (app,connection, passport) {
 
     app.post('/insert-clientes', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [101], connection) }, function (req, res) {
 		let id_tipo_cliente = req.body.id_tipo_cliente || null;
-        var arrayIns = [req.body.nombre, req.body.apellido, req.body.dni, req.body.telefono, req.body.direccion, id_tipo_cliente, req.body.mail, 1];
+        var arrayIns = [req.body.nombre, req.body.apellido, req.body.dni, req.body.telefono, req.body.direccion, id_tipo_cliente, req.body.mail, req.body.nro_historia_clinica, req.body.vet_derivante, req.body.estado_cuenta, 1];
 		connection.query("CALL clientes_insertar(?)",  [arrayIns], function (err, result) {
 			if (err) return res.json({ success: 0, error_msj: err.message, err });
 			res.json({ success: 1, result });
@@ -77,8 +77,11 @@ module.exports = function (app,connection, passport) {
             let direccion = req.body.direccion || null;
             let id_tipo_cliente = req.body.id_tipo_cliente || null;
             let mail = req.body.mail || null;
+			let nro_historia_clinica = req.body.nro_historia_clinica|| null; 
+			let vet_derivante = req.body.vet_derivante|| null; 
+			let estado_cuenta = req.body.estado_cuenta|| null;
 
-			let arrayIns = [id, nombre, apellido, dni, telefono, direccion, id_tipo_cliente, mail];
+			let arrayIns = [id, nombre, apellido, dni, telefono, direccion, id_tipo_cliente, mail, nro_historia_clinica, vet_derivante, estado_cuenta];
 			connection.query("CALL clientes_update(?)",  [arrayIns], function (err, result) {
 				if (err) return res.json({ success: 0, error_msj: err.message, err });
 				res.json({ success: 1, result });
