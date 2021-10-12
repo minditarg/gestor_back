@@ -71,7 +71,7 @@ module.exports = function (app, connection, passport) {
       app.post('/update-module',bodyJson, function (req, res) {
 
         try {
-          connection.query("CALL modules_update(?)",[[req.body.id,req.body.nombre,req.body.id_page,req.body.id_type_module,req.body.contenido,req.body.estado]], function (err, result) {
+          connection.query("CALL modules_update(?)",[[req.body.id,req.body.nombre,req.body.id_page,req.body.id_type_module,req.body.contenido,req.body.estado, req.body.columnas]], function (err, result) {
             if (err) return res.status(500).send(err.sqlMessage);
             
             res.json({ success: 1, result });
