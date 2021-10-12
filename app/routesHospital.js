@@ -601,7 +601,13 @@ module.exports = function (app,connection, passport) {
     app.post('/insert-consultas', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [107], connection) }, function (req, res) {
 		let id_paciente = req.body.idPaciente || null;
 		let id_servicio = req.body.id_servicio || null;
-		var arrayIns = [id_paciente, id_servicio, req.body.temperatura, req.body.peso, req.body.consulta, req.body.fecha, 1];
+		let id_signos = req.body.id_signos || null;
+		let id_sensorio = req.body.id_sensorio || null;
+		let id_mucosa = req.body.id_mucosa || null;
+		let id_diag_presuntivo = req.body.id_diag_presuntivo || null;
+		let id_pronostico = req.body.id_pronostico || null;
+		let id_diag_definitivo = req.body.id_diag_definitivo || null;
+		var arrayIns = [id_paciente, id_servicio, req.body.temperatura, req.body.peso, id_sensorio, id_mucosa, req.body.tllc, req.body.frecuencia_cardiaca, req.body.frecuencia_respiratoria, req.body.ganglios, req.body.anexos_cutaneos, /*req.body.consulta,*/ req.body.fecha, id_signos, req.body.anamnesis,req.body.examen_objetivo_particular, req.body.diag_complementarios, id_diag_presuntivo, req.body.tratamiento, id_pronostico, id_diag_definitivo, req.body.informe_diagnostico, req.body.observaciones,1];
 		connection.query("CALL consultas_insertar(?)",  [arrayIns], function (err, result) {
 			if (err) return res.json({ success: 0, error_msj: err.message, err });
 			res.json({ success: 1, result });
@@ -624,7 +630,9 @@ module.exports = function (app,connection, passport) {
 	app.get('/list-paciente/:idPaciente', checkConnection, function (req, res) {
 
 		var idPaciente = req.params.idPaciente;
-		connection.query("SELECT * FROM pacientes WHERE id = ? AND estado > 0", [idPaciente], function (err, result) {
+		let arrayIns = [idPaciente]
+		connection.query("CALL pacientes_listar_id(?)", [arrayIns], function (err, result) {
+		//connection.query("SELECT * FROM pacientes WHERE id = ? AND estado > 0", [idPaciente], function (err, result) {
 			if (err) return res.json({ success: 0, error_msj: err });
 			res.json({ success: 1, result });
 		});
@@ -659,10 +667,27 @@ module.exports = function (app,connection, passport) {
 			let id_servicio = req.body.id_servicio || null;
 			let temperatura = req.body.temperatura || null;
 			let peso = req.body.peso || null;
-			let consulta = req.body.consulta || null;
+			let id_sensorio = req.body.id_sensorio || null;
+			let id_mucosa = req.body.id_mucosa || null;
+			let tllc = req.body.tllc || null;
+			let frecuencia_cardiaca = req.body.frecuencia_cardiaca || null;
+			let frecuencia_respiratoria = req.body.frecuencia_respiratoria || null;
+			let ganglios = req.body.ganglios || null;
+			let anexos_cutaneos = req.body.anexos_cutaneos || null;
+			//let consulta = req.body.consulta || null;
 			let fecha = req.body.fecha || null;
+			let id_signos = req.body.id_signos || null;
+			let anamnesis = req.body.anamnesis || null;
+			let examen_objetivo_particular = req.body.examen_objetivo_particular || null;
+			let diag_complementarios = req.body.diag_complementarios || null;
+			let id_diag_presuntivo = req.body.id_diag_presuntivo || null;
+			let tratamiento = req.body.tratamiento || null;
+			let id_pronostico = req.body.id_pronostico || null;
+			let id_diag_definitivo = req.body.id_diag_definitivo || null;
+			let informe_diagnostico = req.body.informe_diagnostico || null;
+			let observaciones = req.body.observaciones || null;
 
-			let arrayIns = [id, id_servicio, temperatura, peso, consulta, fecha];
+			let arrayIns = [id, id_servicio, temperatura, peso, id_sensorio, id_mucosa, tllc, frecuencia_cardiaca, frecuencia_respiratoria, ganglios, anexos_cutaneos, /*consulta,*/ fecha, id_signos, anamnesis, examen_objetivo_particular, diag_complementarios, id_diag_presuntivo, tratamiento, id_pronostico, id_diag_definitivo, informe_diagnostico, observaciones];
 			connection.query("CALL consultas_update(?)",  [arrayIns], function (err, result) {
 				if (err) return res.json({ success: 0, error_msj: err.message, err });
 				res.json({ success: 1, result });
@@ -782,10 +807,84 @@ module.exports = function (app,connection, passport) {
 	app.post('/insert-consultas-archivo-subido', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [107], connection) }, function (req, res) {
 		let id_paciente = req.body.idPaciente || null;
 		let id_servicio = req.body.id_servicio || null;
-		var arrayIns = [id_paciente, id_servicio, req.body.temperatura, req.body.peso, req.body.consulta, req.body.fecha, 1];
+		let id_signos = req.body.id_signos || null;
+		let id_sensorio = req.body.id_sensorio || null;
+		let id_mucosa = req.body.id_mucosa || null;
+		let id_diag_presuntivo = req.body.id_diag_presuntivo || null;
+		let id_pronostico = req.body.id_pronostico || null;
+		let id_diag_definitivo = req.body.id_diag_definitivo || null;
+		var arrayIns = [id_paciente, id_servicio, req.body.temperatura, req.body.peso, id_sensorio, id_mucosa, req.body.tllc, 
+			req.body.frecuencia_cardiaca, req.body.frecuencia_respiratoria, req.body.ganglios, req.body.anexos_cutaneos, 
+			/*req.body.consulta,*/req.body.fecha, id_signos, req.body.anamnesis, 
+			req.body.examen_objetivo_particular, req.body.diag_complementarios, id_diag_presuntivo, req.body.tratamiento, id_pronostico, id_diag_definitivo, req.body.informe_diagnostico, req.body.observaciones, 1];
 		connection.query("CALL consultas_con_archivo_insertar(?)",  [arrayIns], function (err, result) {
 			if (err) return res.json({ success: 0, error_msj: err.message, err });
 			res.json({ success: 1, result });
+		})
+	});
+
+	app.get('/list-signo', checkConnection, function (req, res) {
+
+		connection.query("SELECT * FROM signos_sintomas WHERE estado = 1 ORDER BY descripcion", function (err, result) {
+			if (err) {
+				return res.json({ success: 0, error_msj: err });
+			}
+			else {
+
+				res.json({ success: 1, result });
+			}
+		})
+	});
+
+	app.get('/list-sensorio', checkConnection, function (req, res) {
+
+		connection.query("SELECT * FROM consultas_sensorios WHERE estado = 1 ORDER BY descripcion", function (err, result) {
+			if (err) {
+				return res.json({ success: 0, error_msj: err });
+			}
+			else {
+
+				res.json({ success: 1, result });
+			}
+		})
+	});
+
+	app.get('/list-mucosa', checkConnection, function (req, res) {
+
+		connection.query("SELECT * FROM consultas_mucosas WHERE estado = 1 ORDER BY descripcion", function (err, result) {
+			if (err) {
+				return res.json({ success: 0, error_msj: err });
+			}
+			else {
+
+				res.json({ success: 1, result });
+			}
+		})
+	});
+
+	app.get('/list-pronostico', checkConnection, function (req, res) {
+
+		connection.query("SELECT * FROM consultas_pronosticos WHERE estado = 1 ORDER BY descripcion", function (err, result) {
+			if (err) {
+				return res.json({ success: 0, error_msj: err });
+			}
+			else {
+
+				res.json({ success: 1, result });
+			}
+		})
+	});
+
+	app.get('/list-patologia', checkConnection, function (req, res) {
+
+		connection.query("SELECT * FROM patologias WHERE estado = 1 ORDER BY descripcion", function (err, result) {
+			if (err) {
+				return res.json({ success: 0, error_msj: err });
+			}
+			else {
+
+				res.json({ success: 1, result });
+			}
 		})
 	});
 
