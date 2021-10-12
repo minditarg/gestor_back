@@ -37,10 +37,11 @@ module.exports = function (app, connection, passport) {
     
       });
 
-    app.get('/list-pages', function (req, res) {
-
+    app.get('/list-pages/tipo/:tipoPage', function (req, res) {
+        let tipoPage = req.params.tipoPage;
+        console.log(tipoPage);
         try {
-          connection.query("CALL pages_list", function (err, result) {
+          connection.query("CALL pages_list(?)",[[tipoPage]], function (err, result) {
             if (err) return res.status(500).send(err);
             
             res.json({ success: 1, result:result[0] });
