@@ -37,6 +37,8 @@ module.exports = function (app, connection, passport) {
     
       });
 
+    
+
       app.get('/list-modules-bypage/:idPage', function (req, res) {
         let idPage = parseInt(req.params.idPage);
         try {
@@ -135,6 +137,22 @@ module.exports = function (app, connection, passport) {
 
         try {
           connection.query("CALL types_modules_list", function (err, result) {
+            if (err) return res.status(500).send(err);
+            
+            res.json({ success: 1, result:result[0] });
+    
+          })
+        } catch (e) {
+          return res.status(500).send(e.message)
+        }
+    
+      });
+
+      app.get('/list-types-modules-bytipo/:tipoModulo', function (req, res) {
+        let tipoModulo = req.params.tipoModulo;
+
+        try {
+          connection.query("CALL types_modules_list_bytipo(?)",[[ tipoModulo ]], function (err, result) {
             if (err) return res.status(500).send(err);
             
             res.json({ success: 1, result:result[0] });
