@@ -288,6 +288,28 @@ module.exports = function (app,connection, passport) {
 		})
 	});
 
+	app.get('/list-especies_por_clase/:id_clase', function (req, res) {
+		var id_clase = parseInt(req.params.id_clase) || 0;
+		console.log(id_clase);
+		connection.query("CALL especies_listar_por_clase(?)", [id_clase], function (err, result) {
+			if (err) return res.status(500).send(err);
+
+			res.json({ success: 1, result: result[0] });
+		});
+
+	});
+	
+	app.get('/list-razas_por_especie/:id_especie', function (req, res) {
+		var id_especie = parseInt(req.params.id_especie) || 0;
+		console.log(id_especie);
+		connection.query("CALL razas_listar_por_especie(?)", [id_especie], function (err, result) {
+			if (err) return res.status(500).send(err);
+
+			res.json({ success: 1, result: result[0] });
+		});
+
+	});
+
 	/********************************* */
     /*CLASES*/
     /********************************* */
