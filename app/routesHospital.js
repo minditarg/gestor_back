@@ -39,7 +39,7 @@ module.exports = function (app,connection, passport) {
 
     app.post('/insert-clientes', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [101], connection) }, function (req, res) {
 		let id_tipo_cliente = req.body.id_tipo_cliente || null;
-        var arrayIns = [req.body.nombre, req.body.apellido, req.body.dni, req.body.telefono, req.body.direccion, id_tipo_cliente, req.body.mail, req.body.nro_historia_clinica, req.body.vet_derivante, req.body.estado_cuenta, 1];
+        var arrayIns = [req.body.nombre, req.body.apellido, req.body.dni, req.body.telefono, req.body.direccion, id_tipo_cliente, req.body.mail, /*req.body.nro_historia_clinica,*/ req.body.vet_derivante, req.body.estado_cuenta, 1];
 		connection.query("CALL clientes_insertar(?)",  [arrayIns], function (err, result) {
 			if (err) return res.json({ success: 0, error_msj: err.message, err });
 			res.json({ success: 1, result });
@@ -77,11 +77,11 @@ module.exports = function (app,connection, passport) {
             let direccion = req.body.direccion || null;
             let id_tipo_cliente = req.body.id_tipo_cliente || null;
             let mail = req.body.mail || null;
-			let nro_historia_clinica = req.body.nro_historia_clinica|| null; 
+			//let nro_historia_clinica = req.body.nro_historia_clinica|| null; 
 			let vet_derivante = req.body.vet_derivante|| null; 
 			let estado_cuenta = req.body.estado_cuenta|| null;
 
-			let arrayIns = [id, nombre, apellido, dni, telefono, direccion, id_tipo_cliente, mail, nro_historia_clinica, vet_derivante, estado_cuenta];
+			let arrayIns = [id, nombre, apellido, dni, telefono, direccion, id_tipo_cliente, mail, /*nro_historia_clinica,*/ vet_derivante, estado_cuenta];
 			connection.query("CALL clientes_update(?)",  [arrayIns], function (err, result) {
 				if (err) return res.json({ success: 0, error_msj: err.message, err });
 				res.json({ success: 1, result });
@@ -128,7 +128,7 @@ module.exports = function (app,connection, passport) {
 		let id_alimentacion = req.body.id_alimentacion || null;
 		let id_habitos = req.body.id_habitos || null;
 		let id_mascotas = req.body.id_mascotas || null;
-        var arrayIns = [req.body.nombre, id_cliente, id_clase, id_especie, id_raza,  req.body.color, id_sexo, req.body.castrado, req.body.notas, req.body.fecha_nacimiento, req.body.fecha_adopcion, id_alimentacion, id_habitos, id_mascotas, 1];
+        var arrayIns = [req.body.nombre, id_cliente, id_clase, id_especie, id_raza,  req.body.color, id_sexo, req.body.castrado, req.body.notas, req.body.fecha_nacimiento, req.body.fecha_adopcion, id_alimentacion, id_habitos, id_mascotas, req.body.nro_historia_clinica, 1];
 		connection.query("CALL pacientes_insertar(?)",  [arrayIns], function (err, result) {
 			if (err) return res.json({ success: 0, error_msj: err.message, err });
 			res.json({ success: 1, result });
@@ -225,8 +225,9 @@ module.exports = function (app,connection, passport) {
 			let id_alimentacion = req.body.id_alimentacion || null;
 			let id_habitos = req.body.id_habitos || null;
 			let id_mascotas = req.body.id_mascotas || null;
+			let nro_historia_clinica = req.body.nro_historia_clinica|| null;
 
-			let arrayIns = [id, nombre, id_cliente, id_clase, id_especie, id_raza, color, id_sexo, castrado, notas, fecha_nacimiento, fecha_adopcion, id_alimentacion, id_habitos, id_mascotas];
+			let arrayIns = [id, nombre, id_cliente, id_clase, id_especie, id_raza, color, id_sexo, castrado, notas, fecha_nacimiento, fecha_adopcion, id_alimentacion, id_habitos, id_mascotas, nro_historia_clinica];
 			connection.query("CALL pacientes_update(?)",  [arrayIns], function (err, result) {
 				if (err) return res.json({ success: 0, error_msj: err.message, err });
 				res.json({ success: 1, result });
