@@ -565,7 +565,7 @@ module.exports = function (app,connection, passport) {
     });
 
     app.post('/insert-servicios', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [107], connection) }, function (req, res) {
-		var arrayIns = [req.body.codigo, req.body.descripcion, 1];
+		var arrayIns = [req.body.codigo, req.body.descripcion, req.body.tratamiento, req.body.consulta, 1];
 		connection.query("CALL servicios_insertar(?)",  [arrayIns], function (err, result) {
 			if (err) return res.json({ success: 0, error_msj: err.message, err });
 			res.json({ success: 1, result });
@@ -599,9 +599,11 @@ module.exports = function (app,connection, passport) {
 		if (req.body.id) {
 			let id = req.body.id || null;
 			let codigo = req.body.codigo || null;
-			let descripcion = req.body.descripcion || null;
+			let descripcion = req.body.descripcion 
+			let tratamiento = req.body.tratamiento|| null; 
+			let consulta = req.body.consulta|| null;
 
-			let arrayIns = [id, codigo, descripcion];
+			let arrayIns = [id, codigo, descripcion, tratamiento, consulta];
 			connection.query("CALL servicios_update(?)",  [arrayIns], function (err, result) {
 				if (err) return res.json({ success: 0, error_msj: err.message, err });
 				res.json({ success: 1, result });
@@ -681,7 +683,7 @@ module.exports = function (app,connection, passport) {
 
     app.get('/list-consultas/:id', checkConnection, function (req, res) {
 		var id = req.params.id;
-		connection.query("SELECT * FROM consultas WHERE id = ? AND estado > 0", [id], function (err, result) {
+		connection.query("SELECT c.*, s.tratamiento as 'checktratamiento', s.consulta as 'checkconsulta' FROM consultas c INNER JOIN servicios s ON c.id_servicio = s.id  WHERE c.id = ? AND c.estado > 0", [id], function (err, result) {
 			if (err) return res.json({ success: 0, error_msj: err });
 			res.json({ success: 1, result });
 		});
