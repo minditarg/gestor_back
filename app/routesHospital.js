@@ -832,7 +832,8 @@ module.exports = function (app,connection, passport) {
 				//var objectoUpdate = { archivo: path.join('/' + process.env.UPLOAD_PATH + '/archivos/consulta/' + id + "/" + nombre_foto), estado: -1 };
 				var arrayIns = [path.join('/' + process.env.UPLOAD_PATH + '/archivos/consulta/' + id + "/" + nombre_foto), -1];
 				//connection.query("INSERT INTO consultas (archivo, estado) VALUES ? ", [objectoUpdate], function (err, result) {
-					connection.query("INSERT INTO consultas (archivo, estado) VALUES (?) ", [arrayIns], function (err, result) {
+					//connection.query("INSERT INTO consultas (archivo, estado) VALUES (?) ", [arrayIns], function (err, result) {
+					connection.query("CALL consultas_archivo_insertar(?)",  [arrayIns], function (err, result) {
 					if (err) return res.json({ success: 0, error_msj: "ha ocurrido un error al intentar modificar los datos de la operacion", err });
 					res.json({ success: 1, result });
 				})
@@ -854,7 +855,8 @@ module.exports = function (app,connection, passport) {
 		let id_diag_presuntivo = req.body.id_diag_presuntivo || null;
 		let id_pronostico = req.body.id_pronostico || null;
 		let id_diag_definitivo = req.body.id_diag_definitivo || null;
-		var arrayIns = [id_paciente, id_servicio, req.body.temperatura, req.body.peso, id_sensorio, id_mucosa, req.body.tllc, 
+		let id = req.body.idConsulta || null;
+		var arrayIns = [id, id_paciente, id_servicio, req.body.temperatura, req.body.peso, id_sensorio, id_mucosa, req.body.tllc, 
 			req.body.frecuencia_cardiaca, req.body.frecuencia_respiratoria, req.body.ganglios, req.body.anexos_cutaneos, 
 			/*req.body.consulta,*/req.body.fecha, id_signos, req.body.anamnesis, 
 			req.body.examen_objetivo_particular, req.body.diag_complementarios, id_diag_presuntivo, req.body.tratamiento, id_pronostico, id_diag_definitivo, req.body.informe_diagnostico, req.body.observaciones, 1];
