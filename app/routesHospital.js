@@ -174,6 +174,19 @@ module.exports = function (app,connection, passport) {
 		})
 	});
 
+	app.get('/list-especie-patologias', checkConnection, function (req, res) {
+
+		connection.query("SELECT * FROM especies WHERE estado = 1 OR id = 5 ORDER BY DESCRIPCION", function (err, result) {
+			if (err) {
+				return res.json({ success: 0, error_msj: err });
+			}
+			else {
+
+				res.json({ success: 1, result });
+			}
+		})
+	});
+
 	app.get('/list-raza', checkConnection, function (req, res) {
 
 		connection.query("SELECT * FROM razas WHERE estado = 1 ORDER BY DESCRIPCION", function (err, result) {
@@ -905,7 +918,7 @@ module.exports = function (app,connection, passport) {
 
 	app.get('/list-patologia/:idEspecie', checkConnection, function (req, res) {
 		var id = req.params.idEspecie;
-		connection.query("SELECT p.* FROM patologias p INNER JOIN especies e ON e.id = p.id_especie INNER JOIN pacientes pa ON pa.id_especie = e.id WHERE p.estado = 1 AND pa.id = ? ORDER BY p.descripcion", [id],function (err, result) {
+		connection.query("SELECT p.* FROM patologias p LEFT JOIN especies e ON e.id = p.id_especie LEFT JOIN pacientes pa ON pa.id_especie = e.id WHERE p.estado = 1 AND pa.id = ?  OR e.id = 5 ORDER BY p.descripcion", [id],function (err, result) {
 			if (err) {
 				return res.json({ success: 0, error_msj: err });
 			}
@@ -918,7 +931,7 @@ module.exports = function (app,connection, passport) {
 
 	app.get('/list-patologia-consulta/:idConsulta', checkConnection, function (req, res) {
 		var id = req.params.idConsulta;
-		connection.query("SELECT p.* FROM patologias p INNER JOIN especies e ON e.id = p.id_especie INNER JOIN pacientes pa ON pa.id_especie = e.id	INNER JOIN consultas c ON c.id_paciente = pa.id	WHERE p.estado = 1 AND c.id = ?	ORDER BY p.descripcion;", [id],function (err, result) {
+		connection.query("SELECT p.* FROM patologias p LEFT JOIN especies e ON e.id = p.id_especie LEFT JOIN pacientes pa ON pa.id_especie = e.id	LEFT JOIN consultas c ON c.id_paciente = pa.id	WHERE p.estado = 1 AND c.id = ?	OR e.id = 5 ORDER BY p.descripcion;", [id],function (err, result) {
 			if (err) {
 				return res.json({ success: 0, error_msj: err });
 			}
