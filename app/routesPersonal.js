@@ -228,7 +228,7 @@ module.exports = function (app,connection, passport) {
 
     app.get('/list-empleado', checkConnection, function (req, res) {
 
-		connection.query("SELECT * FROM empleados WHERE estado = 1", function (err, result) {
+		connection.query("SELECT * FROM empleados WHERE estado = 1 order by apellido, nombre", function (err, result) {
 			if (err) {
 				return res.json({ success: 0, error_msj: err });
 			}
