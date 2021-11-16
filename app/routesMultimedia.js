@@ -13,11 +13,12 @@ var bodyUrlencoded = bodyParser.urlencoded(
 var multer = require('multer');
 var storage = multer.diskStorage({
   destination: function (req, file, callback) {
+    if(req.body.module_id)
+      mkdirp.sync(path.join(__dirname, '../' + process.env.UPLOAD_PATH + '/modules/' + req.body.module_id + '/thumbs'));
 
-    callback(null, './' + process.env.UPLOAD_PATH + '/');
+    callback(null, './' + process.env.UPLOAD_PATH + '/' + (req.body.module_id ? 'modules/' + req.body.module_id + '/' : '')  );
   },
   filename: function (req, file, callback) {
-    console.log(file);
     callback(null, file.originalname);
   }
 });
@@ -140,7 +141,6 @@ module.exports = function (app, connection, passport) {
   });
 
   app.post('/insert-only-file', function (req, res) {
-
     mkdirp.sync(path.join(__dirname, '../' + process.env.UPLOAD_PATH + '/thumbs'));
 
 
@@ -150,8 +150,8 @@ module.exports = function (app, connection, passport) {
 
       if (req.file.mimetype.indexOf('image') > -1) {
         try {
-          let thumbnail = await imageThumbnail('./' + process.env.UPLOAD_PATH + '/' + req.file.filename, { percentage: 25 });
-          fs.writeFileSync('./' + process.env.UPLOAD_PATH + '/thumbs/' + req.file.filename, thumbnail);
+          let thumbnail = await imageThumbnail('./' + process.env.UPLOAD_PATH + '/' + (req.body.module_id ? 'modules/' + req.body.module_id + '/' : '' ) + req.file.filename, { percentage: 25 });
+          fs.writeFileSync('./' + process.env.UPLOAD_PATH + (req.body.module_id ? '/modules/' + req.body.module_id  : '' ) + '/thumbs/' + req.file.filename, thumbnail);
 
           if (req.body.thumbs) {
 
