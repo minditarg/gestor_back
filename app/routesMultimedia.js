@@ -29,13 +29,12 @@ var upload = multer({ storage: storage }).single('userPhoto');
 var storageNoticia = multer.diskStorage({
   destination: function (req, file, callback) {
     let { id_noticia } = req.body;
-
     if(id_noticia){
       mkdirp.sync(path.join(__dirname, '../' + process.env.UPLOAD_PATH + '/noti/' + id_noticia));
       callback(null, './' + process.env.UPLOAD_PATH + '/noti/' + id_noticia);
     }
     else {
-      callback(new Error("No se encuentra el id de la noticia"),false);
+      callback("No se encuentra el id de la noticia",false);
     }  
     
   },
@@ -46,12 +45,12 @@ var storageNoticia = multer.diskStorage({
     let nombre = file.originalname;
 
     nombre = nombre.replace(regular1,"_").replace(regular2,"");
-
     callback(null, nombre);
   }
 });
 //var upload = multer({dest:'uploads/'});
-var uploadNoticia = multer({ storage: storageNoticia }).single('userFile');
+var uploadNoticia = multer({ storage: storageNoticia ,
+}).single('userFile');
 
 module.exports = function (app, connection, passport) {
 
@@ -71,7 +70,7 @@ module.exports = function (app, connection, passport) {
 
   });
 
-  app.get('/list-files', function (req, res) {
+  app.post('/list-files', function (req, res) {
 
     try {
       connection.query("CALL files_list()", function (err, result) {
@@ -194,10 +193,11 @@ module.exports = function (app, connection, passport) {
   app.post('/insert-noticia-file', function (req, res) {
 
     
-    uploadNoticia(req, res, async function (err) {
+    uploadNoticia(req, res,function (err) {
       if (err) return res.status(500).send(err);
 
- 
+      if(!req.file) return res.status(500).send("no se ha pasado el archivo");
+
           let type_file;
           if (req.file.mimetype.indexOf('image') > -1)
             type_file = 1
