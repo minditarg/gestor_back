@@ -577,7 +577,7 @@ module.exports = function (app,connection, passport) {
         });
     });
 
-    app.post('/insert-servicios', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [107], connection) }, function (req, res) {
+    app.post('/insert-servicios', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [108], connection) }, function (req, res) {
 		var arrayIns = [req.body.codigo, req.body.descripcion, req.body.tratamiento, req.body.consulta, 1];
 		connection.query("CALL servicios_insertar(?)",  [arrayIns], function (err, result) {
 			if (err) return res.json({ success: 0, error_msj: err.message, err });
@@ -608,7 +608,7 @@ module.exports = function (app,connection, passport) {
 		});
 	});
 
-	app.post('/update-servicio', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [107], connection) }, function (req, res) {
+	app.post('/update-servicio', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [108], connection) }, function (req, res) {
 		if (req.body.id) {
 			let id = req.body.id || null;
 			let codigo = req.body.codigo || null;
@@ -846,7 +846,7 @@ module.exports = function (app,connection, passport) {
 
 	});
 
-	app.post('/insert-consultas-archivo-subido', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [107], connection) }, function (req, res) {
+	app.post('/insert-consultas-archivo-subido', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [108], connection) }, function (req, res) {
 		let id_paciente = req.body.idPaciente || null;
 		let id_servicio = req.body.id_servicio || null;
 		let id_signos = req.body.id_signos || null;
