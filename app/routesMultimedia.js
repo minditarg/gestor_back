@@ -5,6 +5,7 @@ var formidableMiddleware = require('express-formidable');
 var fs = require('fs');
 var path = require('path');
 var bodyJson = bodyParser.json();
+var general = require('./functionsGeneral');
 const imageThumbnail = require('image-thumbnail');
 var bodyUrlencoded = bodyParser.urlencoded(
   { extended: true }
@@ -55,7 +56,7 @@ var uploadNoticia = multer({ storage: storageNoticia ,
 module.exports = function (app, connection, passport) {
 
 
-  app.get('/list-files/:idFile', function (req, res) {
+  app.get('/list-files/:idFile', general.isLoggedIn, function (req, res) {
     let idPage = parseInt(req.params.idPage);
     try {
       connection.query("CALL files_detail(?)", [[idFile]], function (err, result) {
@@ -70,7 +71,7 @@ module.exports = function (app, connection, passport) {
 
   });
 
-  app.post('/list-files', function (req, res) {
+  app.post('/list-files', general.isLoggedIn, function (req, res) {
 
     try {
       connection.query("CALL files_list()", function (err, result) {
@@ -86,7 +87,7 @@ module.exports = function (app, connection, passport) {
   });
 
 
-  app.post('/insert-file', function (req, res) {
+  app.post('/insert-file', general.isLoggedIn, function (req, res) {
     mkdirp.sync(path.join(__dirname, '../' + process.env.UPLOAD_PATH + '/thumbs'));
 
 
@@ -139,7 +140,7 @@ module.exports = function (app, connection, passport) {
 
   });
 
-  app.post('/insert-only-file', function (req, res) {
+  app.post('/insert-only-file', general.isLoggedIn, function (req, res) {
     mkdirp.sync(path.join(__dirname, '../' + process.env.UPLOAD_PATH + '/thumbs'));
 
 
@@ -190,7 +191,7 @@ module.exports = function (app, connection, passport) {
 
 
 
-  app.post('/insert-noticia-file', function (req, res) {
+  app.post('/insert-noticia-file', general.isLoggedIn, function (req, res) {
 
     
     uploadNoticia(req, res,function (err) {
@@ -219,7 +220,7 @@ module.exports = function (app, connection, passport) {
   });
 
 
-  app.post('/delete-file', bodyJson, function (req, res) {
+  app.post('/delete-file', bodyJson, general.isLoggedIn, function (req, res) {
 
     try {
       connection.query("CALL files_delete(?)", [[req.body.id]], function (err, result) {

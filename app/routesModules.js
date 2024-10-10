@@ -1,5 +1,6 @@
 
 var bodyParser = require('body-parser');
+var general = require('./functionsGeneral');
 
 var bodyJson = bodyParser.json()
 
@@ -7,7 +8,7 @@ var bodyJson = bodyParser.json()
 module.exports = function (app, connection, passport) {
 
 
-    app.get('/list-modules/:idModule', function (req, res) {
+    app.get('/list-modules/:idModule', general.isLoggedIn, function (req, res) {
         let idModule = parseInt(req.params.idModule);
         try {
           connection.query("CALL modules_detail(?)",[[idModule]], function (err, result) {
@@ -25,7 +26,7 @@ module.exports = function (app, connection, passport) {
     app.get('/list-modules', function (req, res) {
 
         try {
-          connection.query("CALL modules_list", function (err, result) {
+          connection.query("CALL modules_list", general.isLoggedIn, function (err, result) {
             if (err) return res.status(500).send(err);
             
             res.json({ success: 1, result:result[0] });
@@ -39,7 +40,7 @@ module.exports = function (app, connection, passport) {
 
     
 
-      app.get('/list-modules-bypage/:idPage', function (req, res) {
+      app.get('/list-modules-bypage/:idPage', general.isLoggedIn, function (req, res) {
         let idPage = parseInt(req.params.idPage);
         try {
           connection.query("CALL modules_detail_bypage(?)",[[idPage]], function (err, result) {
@@ -55,7 +56,7 @@ module.exports = function (app, connection, passport) {
       });
 
 
-      app.post('/insert-module',bodyJson, function (req, res) {
+      app.post('/insert-module',bodyJson, general.isLoggedIn, function (req, res) {
 
         try {
           connection.query("CALL modules_insert(?)",[[req.body.nombre,req.body.id_page,req.body.id_type_module]], function (err, result) {
@@ -70,7 +71,7 @@ module.exports = function (app, connection, passport) {
     
       });
 
-      app.post('/update-module',bodyJson, function (req, res) {
+      app.post('/update-module',bodyJson, general.isLoggedIn, function (req, res) {
 
         try {
           connection.query("CALL modules_update(?)",[[req.body.id,req.body.nombre,req.body.id_page,req.body.id_type_module,req.body.contenido,req.body.estado, req.body.columnas]], function (err, result) {
@@ -85,7 +86,7 @@ module.exports = function (app, connection, passport) {
     
       });
 
-      app.post('/order-modules', bodyJson, function (req, res) {
+      app.post('/order-modules', bodyJson, general.isLoggedIn, function (req, res) {
         let arrayOrder = req.body.arrayOrder;
 
         if (arrayOrder.length > 0) {
@@ -117,7 +118,7 @@ module.exports = function (app, connection, passport) {
     }
 
 
-      app.post('/delete-module',bodyJson, function (req, res) {
+      app.post('/delete-module',bodyJson, general.isLoggedIn, function (req, res) {
 
         try {
           connection.query("CALL modules_delete(?)",[[req.body.id]], function (err, result) {
@@ -133,7 +134,7 @@ module.exports = function (app, connection, passport) {
       });
 
 
-      app.get('/list-types-modules', function (req, res) {
+      app.get('/list-types-modules', general.isLoggedIn, function (req, res) {
 
         try {
           connection.query("CALL types_modules_list", function (err, result) {
@@ -148,7 +149,7 @@ module.exports = function (app, connection, passport) {
     
       });
 
-      app.get('/list-types-modules-bytipo/:tipoModulo', function (req, res) {
+      app.get('/list-types-modules-bytipo/:tipoModulo', general.isLoggedIn, function (req, res) {
         let tipoModulo = req.params.tipoModulo;
 
         try {

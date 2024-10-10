@@ -1,13 +1,13 @@
 
 var bodyParser = require('body-parser');
-
+var general = require('./functionsGeneral');
 var bodyJson = bodyParser.json()
 
 
 module.exports = function (app, connection, passport) {
 
 
-    app.get('/list-pages/:idPage', function (req, res) {
+    app.get('/list-pages/:idPage', general.isLoggedIn, function (req, res) {
         let idPage = parseInt(req.params.idPage);
         try {
           connection.query("CALL pages_detail(?)",[[idPage]], function (err, result) {
@@ -22,7 +22,7 @@ module.exports = function (app, connection, passport) {
     
       });
 
-      app.get('/list-page-front/:idPage', function (req, res) {
+      app.get('/list-page-front/:idPage', general.isLoggedIn, function (req, res) {
         let idPage = parseInt(req.params.idPage);
         try {
           connection.query("CALL pages_front(?)",[[idPage]], function (err, result) {
@@ -37,7 +37,7 @@ module.exports = function (app, connection, passport) {
     
       });
 
-    app.get('/list-pages/tipo/:tipoPage', function (req, res) {
+    app.get('/list-pages/tipo/:tipoPage', general.isLoggedIn, function (req, res) {
         let tipoPage = req.params.tipoPage;
         console.log(tipoPage);
         try {
@@ -54,7 +54,7 @@ module.exports = function (app, connection, passport) {
       });
 
 
-      app.post('/insert-page',bodyJson, function (req, res) {
+      app.post('/insert-page',bodyJson, general.isLoggedIn, function (req, res) {
 
         try {
           connection.query("CALL pages_insert(?)",[[req.body.nombre,req.body.descripcion,req.body.uri]], function (err, result) {
@@ -69,7 +69,7 @@ module.exports = function (app, connection, passport) {
     
       });
 
-      app.post('/update-page',bodyJson, function (req, res) {
+      app.post('/update-page',bodyJson, general.isLoggedIn, function (req, res) {
 
         try {
           connection.query("CALL pages_update(?)",[[req.body.id,req.body.nombre,req.body.descripcion,req.body.uri]], function (err, result) {
@@ -85,7 +85,7 @@ module.exports = function (app, connection, passport) {
       });
 
 
-      app.post('/delete-page',bodyJson, function (req, res) {
+      app.post('/delete-page',bodyJson, general.isLoggedIn, function (req, res) {
 
         try {
           connection.query("CALL pages_delete(?)",[[req.body.id]], function (err, result) {

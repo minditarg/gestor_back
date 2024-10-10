@@ -60,7 +60,7 @@ module.exports = function(passport,connection) {
                         password: bcrypt.hashSync(password, null, null),
                         nombre: req.body.nombre,
                         id_users_type : req.body.id_users_type, // use the generateHash function in our user model
-                        id_empleado : ((req.body.id_empleado == "") ? null : req.body.id_empleado)
+                        id_empleado : req.body.id_empleado
                     };
 
                     var insertQuery = "INSERT INTO users ( username, password,nombre,id_users_type, id_empleado ) values (?,?,?,?,?)";

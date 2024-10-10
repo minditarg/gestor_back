@@ -1,13 +1,13 @@
 
 var bodyParser = require('body-parser');
-
+var general = require('./functionsGeneral');
 var bodyJson = bodyParser.json()
 
 
 module.exports = function (app, connection, passport) {
 
 
-  app.get('/list-noticias/:idNoticia', function (req, res) {
+  app.get('/list-noticias/:idNoticia', general.isLoggedIn, function (req, res) {
     let idNoticia = parseInt(req.params.idNoticia);
     try {
       connection.query("CALL noticias_detail(?)", [[idNoticia]], function (err, result) {
@@ -22,7 +22,7 @@ module.exports = function (app, connection, passport) {
   });
 
 
-  app.get('/list-mis-noticias/:idNoticia', function (req, res) {
+  app.get('/list-mis-noticias/:idNoticia', general.isLoggedIn, function (req, res) {
     let idUser = (req.user && req.user.id) || null;
     let idNoticia = parseInt(req.params.idNoticia);
     try {
@@ -37,7 +37,7 @@ module.exports = function (app, connection, passport) {
 
   });
 
-  app.get('/list-noticias', function (req, res) {
+  app.get('/list-noticias', general.isLoggedIn, function (req, res) {
 
     try {
       connection.query("CALL noticias_list", function (err, result) {
@@ -53,7 +53,7 @@ module.exports = function (app, connection, passport) {
   });
 
 
-  app.get('/list-mis-noticias-bytipo/:idTipoNoticia', function (req, res) {
+  app.get('/list-mis-noticias-bytipo/:idTipoNoticia', general.isLoggedIn, function (req, res) {
     let idUser = (req.user && req.user.id) || null;
     let idTipoNoticia = parseInt(req.params.idTipoNoticia);
 
@@ -75,7 +75,7 @@ module.exports = function (app, connection, passport) {
 
 
 
-  app.get('/list-noticias-bytipo/:idTipoNoticia', function (req, res) {
+  app.get('/list-noticias-bytipo/:idTipoNoticia', general.isLoggedIn, function (req, res) {
 
     let idTipoNoticia = parseInt(req.params.idTipoNoticia);
 
@@ -92,7 +92,7 @@ module.exports = function (app, connection, passport) {
 
   });
 
-  app.get('/list-transparente-inicial', function (req, res) {
+  app.get('/list-transparente-inicial', general.isLoggedIn, function (req, res) {
     let idTipoNoticia = 4;
     let id_categoria_personal = req.query.id_categoria_personal || null;
     let id_categoria_transparente = req.query.id_categoria_transparente || null;
@@ -114,7 +114,7 @@ module.exports = function (app, connection, passport) {
   });
 
 
-  app.get('/list-transparente-byquery', function (req, res) {
+  app.get('/list-transparente-byquery', general.isLoggedIn, function (req, res) {
     let idTipoNoticia = 4;
     let id_categoria_personal = req.query.id_categoria_personal || null;
     let id_categoria_transparente = req.query.id_categoria_transparente || null;
@@ -136,7 +136,7 @@ module.exports = function (app, connection, passport) {
   });
 
   
-  app.get('/list-videos-byquery', function (req, res) {
+  app.get('/list-videos-byquery', general.isLoggedIn, function (req, res) {
     let idTipoNoticia = 5;
     let id_categoria_personal = req.query.id_categoria_personal || null;
     let id_categoria_transparente = req.query.id_categoria_transparente || null;
@@ -158,7 +158,7 @@ module.exports = function (app, connection, passport) {
   });
 
 
-  app.post('/insert-noticia', bodyJson, function (req, res) {
+  app.post('/insert-noticia', general.isLoggedIn, bodyJson, function (req, res) {
     let nombre = req.body.nombre || null;
     let descripcion = req.body.descripcion || null;
     let idTipoNoticia = req.body.idTipoNoticia || null;
@@ -215,7 +215,7 @@ module.exports = function (app, connection, passport) {
   }
 
 
-  app.post('/update-noticia', bodyJson, function (req, res) {
+  app.post('/update-noticia', bodyJson, general.isLoggedIn, function (req, res) {
     let idNoticia = req.body.id || null;
 
     let nombre = req.body.nombre || null;
@@ -259,7 +259,7 @@ module.exports = function (app, connection, passport) {
   });
 
 
-  app.post('/update-mi-noticia', bodyJson, function (req, res) {
+  app.post('/update-mi-noticia', bodyJson, general.isLoggedIn, function (req, res) {
     let idNoticia = req.body.id || null;
 
     let nombre = req.body.nombre || null;
@@ -315,7 +315,7 @@ module.exports = function (app, connection, passport) {
 
 
 
-  app.post('/delete-mi-noticia', bodyJson, function (req, res) {
+  app.post('/delete-mi-noticia', bodyJson, general.isLoggedIn, function (req, res) {
     let idUser = (req.user && req.user.id) || null;
     try {
       connection.query("CALL mis_noticias_delete(?)", [[req.body.id, idUser]], function (err, result) {
@@ -330,7 +330,7 @@ module.exports = function (app, connection, passport) {
 
   });
 
-  app.post('/delete-noticia', bodyJson, function (req, res) {
+  app.post('/delete-noticia', bodyJson, general.isLoggedIn, function (req, res) {
     let idUser = (req.user && req.user.id) || null;
     try {
       connection.query("CALL noticias_delete(?)", [[req.body.id]], function (err, result) {
@@ -345,7 +345,7 @@ module.exports = function (app, connection, passport) {
 
   });
 
-  app.post('/insert-noticia-image', bodyJson, function (req, res) {
+  app.post('/insert-noticia-image', bodyJson, general.isLoggedIn, function (req, res) {
     let extension = req.body.extension || null;
     try {
       connection.query("CALL noticias_insert_image(?)", [[extension]], function (err, result) {
@@ -361,7 +361,7 @@ module.exports = function (app, connection, passport) {
   });
 
 
-  app.get('/list-types-noticias', function (req, res) {
+  app.get('/list-types-noticias', general.isLoggedIn, function (req, res) {
 
     try {
       connection.query("CALL noticias_tipos_list", function (err, result) {
@@ -376,7 +376,7 @@ module.exports = function (app, connection, passport) {
 
   });
 
-  app.get('/list-types-categorias', function (req, res) {
+  app.get('/list-types-categorias', general.isLoggedIn, function (req, res) {
 
     try {
       connection.query("CALL noticias_categorias_tipos_list", function (err, result) {
@@ -392,7 +392,7 @@ module.exports = function (app, connection, passport) {
   });
 
 
-  app.post('/list-noticias-in', bodyJson, function (req, res) {
+  app.post('/list-noticias-in', bodyJson, general.isLoggedIn, function (req, res) {
     let queryIn = req.body.queryIn
     try {
       connection.query("SELECT * FROM noticias WHERE id IN (?)", [queryIn], function (err, result) {

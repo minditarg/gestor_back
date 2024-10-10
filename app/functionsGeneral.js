@@ -25,6 +25,12 @@ exports.checkPermission = function(req,res,next,arrayPermission,connection) {
    {
    res.status(401).send("No inició sesión en la aplicación");
    }
+}
 
-
+exports.isLoggedIn = function(req, res, next) {
+  // if user is authenticated in the session, carry on
+  if (req.isAuthenticated())
+    return next();
+  // if they aren't redirect them to the home page
+  res.json({ success: 3, error_msj: "no esta autenticado" });
 }

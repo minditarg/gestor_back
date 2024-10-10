@@ -12,7 +12,7 @@ var bcrypt = require('bcrypt-nodejs');
 module.exports = function (app,connection, passport) {
 
 
-	app.get('/me',checkConnection,(req,res,next) => { general.checkPermission(req,res,next,[])}, function (req, res) {
+	app.get('/me',general.isLoggedIn,(req,res,next) => { general.checkPermission(req,res,next,[])}, function (req, res) {
 		var userId = req.user.id;
 
 		connection.query("CALL get_user(?)",[userId], function (err, result) {
@@ -30,7 +30,7 @@ module.exports = function (app,connection, passport) {
 
 	});
 
-  app.get('/list-users_type', checkConnection,function (req, res) {
+  app.get('/list-users_type', general.isLoggedIn,function (req, res) {
 
 
 			connection.query("SELECT * FROM users_type WHERE activo = 1", function (err, result) {
@@ -72,7 +72,7 @@ module.exports = function (app,connection, passport) {
 	});
 
 
-	app.post('/signup-json', bodyJson, checkConnection,function (req, res) {
+	app.post('/signup-json', bodyJson, general.isLoggedIn,function (req, res) {
 
 			passport.authenticate('local-signup', function (err, user, info) {
 				if (err) { return res.json({ success: 0, error_msj: "no se pudo autenticar" }, err) }
@@ -86,7 +86,7 @@ module.exports = function (app,connection, passport) {
 	});
 
 
-	app.get('/list-users/:idUser',checkConnection, function (req, res) {
+	app.get('/list-users/:idUser',general.isLoggedIn, function (req, res) {
 
 			var idUser = req.params.idUser;
 			connection.query("SELECT * FROM users u LEFT JOIN users_type as ut ON u.id_users_type = ut.id WHERE u.id = ?", [idUser], function (err, result) {
@@ -97,7 +97,7 @@ module.exports = function (app,connection, passport) {
 
 	});
 
-	app.get('/list-users',isLoggedIn, checkConnection,function (req, res) {
+	app.get('/list-users',general.isLoggedIn,function (req, res) {
 		var userMeId = 0;
 			if(req.user){
 					userMeId = req.user.id;
@@ -113,7 +113,7 @@ module.exports = function (app,connection, passport) {
 	});
 
 
-	app.get('/list-tipos-usuarios',isLoggedIn, checkConnection,function (req, res) {
+	app.get('/list-tipos-usuarios',general.isLoggedIn,function (req, res) {
 		var userMeId = 0;
 			if(req.user){
 					userMeId = req.user.id;
@@ -129,7 +129,7 @@ module.exports = function (app,connection, passport) {
 	});
 
 
-	app.get('/list-tipo-usuario/:idTipoUsuario',isLoggedIn, checkConnection,function (req, res) {
+	app.get('/list-tipo-usuario/:idTipoUsuario',general.isLoggedIn,function (req, res) {
 		let idTipoUsuario = req.params.idTipoUsuario;
 			connection.query("CALL users_detalle_tipo_usuario(?)",[ idTipoUsuario ], function (err, result) {
 
@@ -141,7 +141,7 @@ module.exports = function (app,connection, passport) {
 
 	});
 
-	app.get('/list-accesos',isLoggedIn, checkConnection,function (req, res) {
+	app.get('/list-accesos',general.isLoggedIn,function (req, res) {
 		let idTipoUsuario = req.params.idTipoUsuario;
 			connection.query("SELECT * FROM accesos", function (err, result) {
 
@@ -154,7 +154,7 @@ module.exports = function (app,connection, passport) {
 	});
 
 
-	app.post('/insert-tipo-usuario',isLoggedIn,bodyJson, checkConnection,function (req, res) {
+	app.post('/insert-tipo-usuario',bodyJson, general.isLoggedIn,function (req, res) {
 
 
 			connection.getConnection(function(err, connection) {
@@ -222,7 +222,7 @@ module.exports = function (app,connection, passport) {
 
 	});
 
-	app.post('/update-tipo-usuario', bodyJson, checkConnection, function (req, res) {
+	app.post('/update-tipo-usuario', bodyJson, general.isLoggedIn, function (req, res) {
 
     connection.getConnection(function(err, connection) {
       if (err) {
@@ -296,7 +296,7 @@ module.exports = function (app,connection, passport) {
 
 
 
-	app.post('/update-user',isLoggedIn, bodyJson,checkConnection, function (req, res) {
+	app.post('/update-user', bodyJson,general.isLoggedIn, function (req, res) {
 
 
 			if (req.body.id) {
@@ -316,7 +316,7 @@ module.exports = function (app,connection, passport) {
 	});
 
 
-	app.post('/update-pass',isLoggedIn, bodyJson,checkConnection, function (req, res) {
+	app.post('/update-pass', bodyJson,general.isLoggedIn, function (req, res) {
 
 		if (req.body.id) {
 			var id_users = parseInt(req.body.id);
@@ -333,7 +333,7 @@ module.exports = function (app,connection, passport) {
 
 });
 
-app.post('/update-me-pass',isLoggedIn, bodyJson,checkConnection, function (req, res) {
+app.post('/update-me-pass', bodyJson,general.isLoggedIn, function (req, res) {
 
 		let userId = (req.user && req.user.id) || null;
 		let oldPass = req.body.oldPass || null;
@@ -366,7 +366,7 @@ app.post('/update-me-pass',isLoggedIn, bodyJson,checkConnection, function (req, 
 
 });
 
-	app.post('/delete-user', bodyJson,checkConnection, function (req, res) {
+	app.post('/delete-user', bodyJson,general.isLoggedIn, function (req, res) {
 
 
 			if (req.body.id) {
@@ -385,7 +385,7 @@ app.post('/update-me-pass',isLoggedIn, bodyJson,checkConnection, function (req, 
 	});
 
 
-	app.post('/delete-tipo-usuario', bodyJson,checkConnection, function (req, res) {
+	app.post('/delete-tipo-usuario', bodyJson,general.isLoggedIn, function (req, res) {
 
 			if (req.body.id) {
 				var id_users = parseInt(req.body.id);

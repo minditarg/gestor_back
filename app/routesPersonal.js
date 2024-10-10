@@ -31,14 +31,14 @@ module.exports = function (app,connection, passport) {
     /*TIPOS DE FALTAS*/
     /********************************* */
 
-    app.get('/list-tiposfaltas', isLoggedIn, checkConnection, function (req, res) {
+    app.get('/list-tiposfaltas', general.isLoggedIn, checkConnection, function (req, res) {
         connection.query("SELECT * FROM tipos_faltas WHERE estado = 1", function (err, result) {
             if (err) return res.json({ success: 0, error_msj: err });
             res.json({ success: 1, result });
         });
     });
 
-    app.post('/insert-tiposfaltas', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [92], connection) }, function (req, res) {
+    app.post('/insert-tiposfaltas', bodyJson, general.isLoggedIn, (req, res, next) => { general.checkPermission(req, res, next, [92], connection) }, function (req, res) {
 		var arrayIns = [req.body.descripcion, req.body.cantidad_dias, 1];
 		connection.query("CALL tiposfaltas_insertar(?)",  [arrayIns], function (err, result) {
 			if (err) return res.json({ success: 0, error_msj: err.message, err });
@@ -46,7 +46,7 @@ module.exports = function (app,connection, passport) {
 		})
 	});
 
-    app.post('/delete-tipofalta', bodyJson, checkConnection, function (req, res) {
+    app.post('/delete-tipofalta', bodyJson, general.isLoggedIn, function (req, res) {
 		if (req.body.id) {
 			var id = parseInt(req.body.id);
 			var objectoUpdate = { estado: 0 };
@@ -61,7 +61,7 @@ module.exports = function (app,connection, passport) {
 		}
 	});
 
-    app.get('/list-tiposfaltas/:id', checkConnection, function (req, res) {
+    app.get('/list-tiposfaltas/:id', general.isLoggedIn, function (req, res) {
 		var id = req.params.id;
 		connection.query("SELECT * FROM tipos_faltas WHERE id = ? AND estado > 0", [id], function (err, result) {
 			if (err) return res.json({ success: 0, error_msj: err });
@@ -69,7 +69,7 @@ module.exports = function (app,connection, passport) {
 		});
 	});
 
-	app.post('/update-tipofalta', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [92], connection) }, function (req, res) {
+	app.post('/update-tipofalta', bodyJson, general.isLoggedIn, (req, res, next) => { general.checkPermission(req, res, next, [92], connection) }, function (req, res) {
 		if (req.body.id) {
 			let id = req.body.id || null;
 			let descripcion = req.body.descripcion || null;
@@ -90,14 +90,14 @@ module.exports = function (app,connection, passport) {
     /*EMPLEADOS*/
     /********************************* */
 
-    app.get('/list-empleados', isLoggedIn, checkConnection, function (req, res) {
+    app.get('/list-empleados', general.isLoggedIn, function (req, res) {
         connection.query("SELECT e.*, te.descripcion as 'tipoempleado' FROM empleados e INNER JOIN tipos_empleados te ON e.id_tipo_empleado = te.id WHERE e.estado = 1 order by e.apellido, e.nombre", function (err, result) {
             if (err) return res.json({ success: 0, error_msj: err });
             res.json({ success: 1, result });
         });
     });
 
-    app.post('/insert-empleados', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [91], connection) }, function (req, res) {
+    app.post('/insert-empleados', bodyJson, general.isLoggedIn, (req, res, next) => { general.checkPermission(req, res, next, [91], connection) }, function (req, res) {
 		let id_tipo_empleado = req.body.id_tipo_empleado || null;
         var arrayIns = [req.body.nombre, req.body.apellido, req.body.dni, req.body.telefono, req.body.direccion, id_tipo_empleado, req.body.mail, 1];
 		connection.query("CALL empleados_insertar(?)",  [arrayIns], function (err, result) {
@@ -106,7 +106,7 @@ module.exports = function (app,connection, passport) {
 		})
 	});
 
-    app.post('/delete-empleado', bodyJson, checkConnection, function (req, res) {
+    app.post('/delete-empleado', bodyJson, general.isLoggedIn, function (req, res) {
 		if (req.body.id) {
 			var id = parseInt(req.body.id);
 			var objectoUpdate = { estado: 0 };
@@ -121,7 +121,7 @@ module.exports = function (app,connection, passport) {
 		}
 	});
 
-    app.get('/list-empleados/:id', checkConnection, function (req, res) {
+    app.get('/list-empleados/:id', general.isLoggedIn, function (req, res) {
 		var id = req.params.id;
 		connection.query("SELECT * FROM empleados WHERE id = ? AND estado > 0", [id], function (err, result) {
 			if (err) return res.json({ success: 0, error_msj: err });
@@ -129,7 +129,7 @@ module.exports = function (app,connection, passport) {
 		});
 	});
 
-	app.post('/update-empleado', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [91], connection) }, function (req, res) {
+	app.post('/update-empleado', bodyJson, general.isLoggedIn, (req, res, next) => { general.checkPermission(req, res, next, [91], connection) }, function (req, res) {
 		if (req.body.id) {
 			let id = req.body.id || null;
 			let nombre = req.body.nombre || null;
@@ -151,7 +151,7 @@ module.exports = function (app,connection, passport) {
 		}
 	});
 
-    app.get('/list-tipo-empleado', checkConnection, function (req, res) {
+    app.get('/list-tipo-empleado', general.isLoggedIn, function (req, res) {
 
 		connection.query("SELECT * FROM tipos_empleados WHERE estado = 1", function (err, result) {
 			if (err) {
@@ -168,7 +168,7 @@ module.exports = function (app,connection, passport) {
     /*CONTROL DE FALTAS*/
     /********************************* */
 
-    app.get('/list-controlfaltas', isLoggedIn, checkConnection, function (req, res) {
+    app.get('/list-controlfaltas', general.isLoggedIn, function (req, res) {
         //connection.query("SELECT * FROM control_faltas WHERE estado = 1", function (err, result) {
         connection.query("CALL control_faltas_listar()", function (err, result) {
             if (err) return res.json({ success: 0, error_msj: err });
@@ -176,7 +176,7 @@ module.exports = function (app,connection, passport) {
         });
     });
 
-    app.post('/insert-controlfaltas', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [91], connection) }, function (req, res) {
+    app.post('/insert-controlfaltas', bodyJson, general.isLoggedIn, (req, res, next) => { general.checkPermission(req, res, next, [91], connection) }, function (req, res) {
 		let id_empleado = req.body.id_empleado || null;
 		let id_tipo_falta = req.body.id_tipo_falta || null;
         var arrayIns = [id_empleado, id_tipo_falta, req.body.inicio_licencia, req.body.fin_licencia, 1];
@@ -186,7 +186,7 @@ module.exports = function (app,connection, passport) {
 		})
 	});
 
-    app.post('/delete-controlfalta', bodyJson, checkConnection, function (req, res) {
+    app.post('/delete-controlfalta', bodyJson, general.isLoggedIn, function (req, res) {
 		if (req.body.id) {
 			var id = parseInt(req.body.id);
 			var objectoUpdate = { estado: 0 };
@@ -201,7 +201,7 @@ module.exports = function (app,connection, passport) {
 		}
 	});
 
-    app.get('/list-controlfaltas/:id', checkConnection, function (req, res) {
+    app.get('/list-controlfaltas/:id', general.isLoggedIn, function (req, res) {
 		var id = req.params.id;
 		connection.query("SELECT * FROM control_faltas WHERE id = ? AND estado > 0", [id], function (err, result) {
 			if (err) return res.json({ success: 0, error_msj: err });
@@ -209,7 +209,7 @@ module.exports = function (app,connection, passport) {
 		});
 	});
 
-	app.post('/update-controlfalta', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [91], connection) }, function (req, res) {
+	app.post('/update-controlfalta', bodyJson, general.isLoggedIn, (req, res, next) => { general.checkPermission(req, res, next, [91], connection) }, function (req, res) {
 		if (req.body.id) {
 			let id = req.body.id || null;
 			let id_empleado = req.body.id_empleado || null;
@@ -226,7 +226,7 @@ module.exports = function (app,connection, passport) {
 		}
 	});
 
-    app.get('/list-empleado', checkConnection, function (req, res) {
+    app.get('/list-empleado', general.isLoggedIn, function (req, res) {
 
 		connection.query("SELECT * FROM empleados WHERE estado = 1 order by apellido, nombre", function (err, result) {
 			if (err) {
@@ -239,7 +239,7 @@ module.exports = function (app,connection, passport) {
 		})
 	});
 
-    app.get('/list-tipo-falta', checkConnection, function (req, res) {
+    app.get('/list-tipo-falta', general.isLoggedIn, function (req, res) {
 
 		connection.query("SELECT * FROM tipos_faltas WHERE estado = 1", function (err, result) {
 			if (err) {
@@ -252,7 +252,7 @@ module.exports = function (app,connection, passport) {
 		})
 	});
 
-	app.post('/insert-archivo/:id/:nombre_foto', function (req, res) {
+	app.post('/insert-archivo/:id/:nombre_foto', general.isLoggedIn, function (req, res) {
 
 		var id = req.params.id;
 		var nombre_foto = req.params.nombre_foto;
@@ -295,7 +295,7 @@ module.exports = function (app,connection, passport) {
 
 	});
 
-	app.post('/delete-archivo', bodyJson, checkConnection, function (req, res) {
+	app.post('/delete-archivo', bodyJson, general.isLoggedIn, function (req, res) {
 
 		if (req.body.id) {
 			var id = parseInt(req.body.id);
@@ -313,7 +313,7 @@ module.exports = function (app,connection, passport) {
     /*COMPENSATORIOS*/
     /********************************* */
 
-    app.get('/list-compensatorios', isLoggedIn, checkConnection, function (req, res) {
+    app.get('/list-compensatorios', general.isLoggedIn, function (req, res) {
 
         connection.query("CALL compensatorios_listar()", function (err, result) {
             if (err) return res.json({ success: 0, error_msj: err });
@@ -321,7 +321,7 @@ module.exports = function (app,connection, passport) {
         });
     });
 
-    app.post('/insert-compensatorios', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [91], connection) }, function (req, res) {
+    app.post('/insert-compensatorios', bodyJson, general.isLoggedIn, (req, res, next) => { general.checkPermission(req, res, next, [91], connection) }, function (req, res) {
 		let id_empleado = req.body.id_empleado || null;
 		let horas = req.body.horas || 0;
 		let minutos = req.body.minutos || 0;
@@ -332,7 +332,7 @@ module.exports = function (app,connection, passport) {
 		})
 	});
 
-    app.post('/delete-compensatorio', bodyJson, checkConnection, function (req, res) {
+    app.post('/delete-compensatorio', bodyJson, general.isLoggedIn, function (req, res) {
 		if (req.body.id) {
 			var id = parseInt(req.body.id);
 			var objectoUpdate = { estado: 0 };
@@ -347,7 +347,7 @@ module.exports = function (app,connection, passport) {
 		}
 	});
 
-    app.get('/list-compensatorios/:id', checkConnection, function (req, res) {
+    app.get('/list-compensatorios/:id', general.isLoggedIn, function (req, res) {
 		var id = req.params.id;
 		connection.query("SELECT * FROM compensatorios WHERE id = ? AND estado > 0", [id], function (err, result) {
 			if (err) return res.json({ success: 0, error_msj: err });
@@ -355,7 +355,7 @@ module.exports = function (app,connection, passport) {
 		});
 	});
 
-	app.post('/update-compensatorio', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [91], connection) }, function (req, res) {
+	app.post('/update-compensatorio', bodyJson, general.isLoggedIn, (req, res, next) => { general.checkPermission(req, res, next, [91], connection) }, function (req, res) {
 		if (req.body.id) {
 			let id = req.body.id || null;
 			let id_empleado = req.body.id_empleado || null;
@@ -377,7 +377,7 @@ module.exports = function (app,connection, passport) {
     /*COMPENSATORIOS/FALTAS EMPLEADOS*/
     /********************************* */
 
-	app.get('/list-compensatorios-empleados', isLoggedIn, checkConnection, function (req, res) {
+	app.get('/list-compensatorios-empleados', general.isLoggedIn, function (req, res) {
 
 		let idUser = (req.user && req.user.id) || null;
 		var arrayIns = [idUser];
@@ -387,7 +387,7 @@ module.exports = function (app,connection, passport) {
         });
     });
 
-	app.get('/list-controlfaltas-empleados', isLoggedIn, checkConnection, function (req, res) {
+	app.get('/list-controlfaltas-empleados', general.isLoggedIn, function (req, res) {
         
 		let idUser = (req.user && req.user.id) || null;
 		var arrayIns = [idUser];
@@ -397,7 +397,7 @@ module.exports = function (app,connection, passport) {
         });
     });
 	
-	app.get('/list-faltas-empleados', isLoggedIn, checkConnection, function (req, res) {
+	app.get('/list-faltas-empleados', general.isLoggedIn, function (req, res) {
         
         connection.query("CALL faltas_por_empleados_listar()", [], function (err, result) {
             if (err) return res.json({ success: 0, error_msj: err });
@@ -405,7 +405,7 @@ module.exports = function (app,connection, passport) {
         });
     });
 
-	app.get('/list-compensatorios-gestion', isLoggedIn, checkConnection, function (req, res) {
+	app.get('/list-compensatorios-gestion', general.isLoggedIn, function (req, res) {
         
         connection.query("CALL list_compensatorios_empleados_gestion()", [], function (err, result) {
             if (err) return res.json({ success: 0, error_msj: err });
@@ -417,7 +417,7 @@ module.exports = function (app,connection, passport) {
     /*        EMPLEADOS USERS          */
     /********************************* */
 
-	app.get('/list-empleado-user', checkConnection, function (req, res) {
+	app.get('/list-empleado-user', general.isLoggedIn, function (req, res) {
 
 		connection.query("SELECT e.* FROM empleados e LEFT JOIN users u ON u.id_empleado = e.id WHERE u.id_empleado IS NULL AND e.estado = 1 ORDER BY e.apellido, e.nombre", function (err, result) {
 			if (err) {
@@ -430,7 +430,7 @@ module.exports = function (app,connection, passport) {
 		})
 	});
 
-	app.get('/list-empleado-edit-user/:iduser', checkConnection, function (req, res) {
+	app.get('/list-empleado-edit-user/:iduser', general.isLoggedIn, function (req, res) {
 
 		var iduser = req.params.iduser;
 		connection.query("CALL edit_user_empleados_listar(?)", [iduser], function (err, result) {

@@ -1,13 +1,13 @@
 
 var bodyParser = require('body-parser');
-
+var general = require('./functionsGeneral');
 var bodyJson = bodyParser.json()
 
 
 module.exports = function (app, connection, passport) {
 
 
-  app.get('/list-videoteca/:idVideoteca', function (req, res) {
+  app.get('/list-videoteca/:idVideoteca', general.isLoggedIn, function (req, res) {
     let idVideoteca = parseInt(req.params.idVideoteca);
     try {
       connection.query("CALL videoteca_detail(?)", [[idVideoteca]], function (err, result) {
@@ -22,7 +22,7 @@ module.exports = function (app, connection, passport) {
   });
 
 
-  app.get('/list-mi-videoteca/:idVideoteca', function (req, res) {
+  app.get('/list-mi-videoteca/:idVideoteca', general.isLoggedIn, function (req, res) {
     let idUser = (req.user && req.user.id) || null;
     let idVideoteca = parseInt(req.params.idVideoteca);
     try {
@@ -37,7 +37,7 @@ module.exports = function (app, connection, passport) {
 
   });
 
-  app.get('/list-videoteca', function (req, res) {
+  app.get('/list-videoteca', general.isLoggedIn, function (req, res) {
 
     try {
       connection.query("CALL videoteca_list", function (err, result) {
@@ -57,7 +57,7 @@ module.exports = function (app, connection, passport) {
 
   
 
-  app.post('/insert-videoteca', bodyJson, function (req, res) {
+  app.post('/insert-videoteca', bodyJson, general.isLoggedIn, function (req, res) {
     let nombre = req.body.nombre || null;
     let descripcion = req.body.descripcion || null;
     let idTipoNoticia = req.body.idTipoNoticia || null;
@@ -114,7 +114,7 @@ module.exports = function (app, connection, passport) {
   }
 
 
-  app.post('/update-videoteca', bodyJson, function (req, res) {
+  app.post('/update-videoteca', bodyJson, general.isLoggedIn, function (req, res) {
     let idNoticia = req.body.id || null;
 
     let nombre = req.body.nombre || null;
@@ -158,7 +158,7 @@ module.exports = function (app, connection, passport) {
   });
 
 
-  app.post('/update-mi-videoteca', bodyJson, function (req, res) {
+  app.post('/update-mi-videoteca', bodyJson, general.isLoggedIn, function (req, res) {
     let idNoticia = req.body.id || null;
 
     let nombre = req.body.nombre || null;
@@ -214,7 +214,7 @@ module.exports = function (app, connection, passport) {
 
 
 
-  app.post('/delete-mi-videoteca', bodyJson, function (req, res) {
+  app.post('/delete-mi-videoteca', bodyJson, general.isLoggedIn, function (req, res) {
     let idUser = (req.user && req.user.id) || null;
     try {
       connection.query("CALL mi_videoteca_delete(?)", [[req.body.id, idUser]], function (err, result) {
@@ -229,7 +229,7 @@ module.exports = function (app, connection, passport) {
 
   });
 
-  app.post('/delete-videoteca', bodyJson, function (req, res) {
+  app.post('/delete-videoteca', bodyJson, general.isLoggedIn, function (req, res) {
     let idUser = (req.user && req.user.id) || null;
     try {
       connection.query("CALL videoteca_delete(?)", [[req.body.id]], function (err, result) {
@@ -244,7 +244,7 @@ module.exports = function (app, connection, passport) {
 
   });
 
-  app.post('/insert-videoteca-image', bodyJson, function (req, res) {
+  app.post('/insert-videoteca-image', bodyJson, general.isLoggedIn, function (req, res) {
     let extension = req.body.extension || null;
     try {
       connection.query("CALL videoteca_insert_image(?)", [[extension]], function (err, result) {

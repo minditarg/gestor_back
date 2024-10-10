@@ -1,4 +1,5 @@
 var bodyParser = require('body-parser');
+var general = require('./functionsGeneral');
 
 var bodyJson = bodyParser.json()
 
@@ -6,7 +7,7 @@ var bodyJson = bodyParser.json()
 module.exports = function (app, connection, passport) {
 
 
-    app.get('/list-items/:idItem', function (req, res) {
+    app.get('/list-items/:idItem', general.isLoggedIn, function (req, res) {
         let idItem = parseInt(req.params.idItem);
         try {
             connection.query("CALL items_detail(?)", [[idItem]], function (err, result) {
@@ -21,7 +22,7 @@ module.exports = function (app, connection, passport) {
 
     });
 
-    app.get('/list-items', function (req, res) {
+    app.get('/list-items', general.isLoggedIn, function (req, res) {
 
         try {
             connection.query("CALL items_list()", function (err, result) {
@@ -36,7 +37,7 @@ module.exports = function (app, connection, passport) {
 
     });
 
-    app.get('/list-items-children/:idItem', function (req, res) {
+    app.get('/list-items-children/:idItem', general.isLoggedIn, function (req, res) {
         let idItem = req.params.idItem || null;
         console.log(idItem);
         try {
@@ -52,7 +53,7 @@ module.exports = function (app, connection, passport) {
 
     });
 
-    app.post('/order-items', bodyJson, function (req, res) {
+    app.post('/order-items', bodyJson, general.isLoggedIn, function (req, res) {
         let arrayOrder = req.body.arrayOrder;
 
         if (arrayOrder.length > 0) {
@@ -84,7 +85,7 @@ module.exports = function (app, connection, passport) {
     }
 
 
-    app.post('/insert-item', bodyJson, function (req, res) {
+    app.post('/insert-item', bodyJson, general.isLoggedIn, function (req, res) {
 
         try {
             connection.query("CALL items_insert(?)", [[req.body.texto, req.body.enlace, req.body.id_page,req.body.id_item_menu]], function (err, result) {
@@ -99,7 +100,7 @@ module.exports = function (app, connection, passport) {
 
     });
 
-    app.post('/update-item', bodyJson, function (req, res) {
+    app.post('/update-item', bodyJson, general.isLoggedIn, function (req, res) {
         try {
             connection.query("CALL items_update(?)", [[req.body.id, req.body.texto, req.body.enlace, req.body.id_page, req.body.estado]], function (err, result) {
                 if (err) return res.status(500).send(err.sqlMessage);
@@ -114,7 +115,7 @@ module.exports = function (app, connection, passport) {
     });
 
 
-    app.post('/delete-item', bodyJson, function (req, res) {
+    app.post('/delete-item', bodyJson, general.isLoggedIn, function (req, res) {
 
         try {
             connection.query("CALL items_delete(?)", [[req.body.id]], function (err, result) {

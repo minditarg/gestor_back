@@ -18,26 +18,26 @@ module.exports = function (app,connection, passport) {
 		next();
 	}
 
-	function isLoggedIn(req, res, next) {
-		// if user is authenticated in the session, carry on
-		if (req.isAuthenticated())
-			return next();
-		// if they aren't redirect them to the home page
-		res.json({ success: 3, error_msj: "no esta autenticado" });
-	}
+	// function isLoggedIn(req, res, next) {
+	// 	// if user is authenticated in the session, carry on
+	// 	if (req.isAuthenticated())
+	// 		return next();
+	// 	// if they aren't redirect them to the home page
+	// 	res.json({ success: 3, error_msj: "no esta autenticado" });
+	// }
 
     /********************************* */
     /*CLIENTES*/
     /********************************* */
 
-    app.get('/list-clientes', isLoggedIn, checkConnection, function (req, res) {
+    app.get('/list-clientes', general.isLoggedIn, function (req, res) {
         connection.query("SELECT c.*, tc.descripcion as 'tipocliente' FROM clientes c INNER JOIN tipos_clientes tc ON c.id_tipo_cliente = tc.id WHERE c.estado = 1 order by c.apellido, c.nombre", function (err, result) {
             if (err) return res.json({ success: 0, error_msj: err });
             res.json({ success: 1, result });
         });
     });
 
-    app.post('/insert-clientes', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [101], connection) }, function (req, res) {
+    app.post('/insert-clientes', bodyJson, general.isLoggedIn, (req, res, next) => { general.checkPermission(req, res, next, [101], connection) }, function (req, res) {
 		let id_tipo_cliente = req.body.id_tipo_cliente || null;
         var arrayIns = [req.body.nombre, req.body.apellido, req.body.dni, req.body.telefono, req.body.direccion, id_tipo_cliente, req.body.mail, /*req.body.nro_historia_clinica,*/ req.body.vet_derivante, req.body.estado_cuenta, 1];
 		connection.query("CALL clientes_insertar(?)",  [arrayIns], function (err, result) {
@@ -46,7 +46,7 @@ module.exports = function (app,connection, passport) {
 		})
 	});
 
-    app.get('/list-tipo-cliente', checkConnection, function (req, res) {
+    app.get('/list-tipo-cliente', general.isLoggedIn, function (req, res) {
 
 		connection.query("SELECT * FROM tipos_clientes WHERE estado = 1", function (err, result) {
 			if (err) {
@@ -59,7 +59,7 @@ module.exports = function (app,connection, passport) {
 		})
 	});
 
-    app.get('/list-clientes/:id', checkConnection, function (req, res) {
+    app.get('/list-clientes/:id', general.isLoggedIn, function (req, res) {
 		var id = req.params.id;
 		connection.query("SELECT * FROM clientes WHERE id = ? AND estado > 0", [id], function (err, result) {
 			if (err) return res.json({ success: 0, error_msj: err });
@@ -67,7 +67,7 @@ module.exports = function (app,connection, passport) {
 		});
 	});
 
-	app.post('/update-cliente', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [101], connection) }, function (req, res) {
+	app.post('/update-cliente', bodyJson, general.isLoggedIn, (req, res, next) => { general.checkPermission(req, res, next, [101], connection) }, function (req, res) {
 		if (req.body.id) {
 			let id = req.body.id || null;
 			let nombre = req.body.nombre || null;
@@ -92,7 +92,7 @@ module.exports = function (app,connection, passport) {
 		}
 	});
 
-    app.post('/delete-cliente', bodyJson, checkConnection, function (req, res) {
+    app.post('/delete-cliente', bodyJson, general.isLoggedIn, function (req, res) {
 		if (req.body.id) {
 			var id = parseInt(req.body.id);
 			var objectoUpdate = { estado: 0 };
@@ -111,7 +111,7 @@ module.exports = function (app,connection, passport) {
     /*PACIENTES*/
     /********************************* */
 
-    app.get('/list-pacientes', isLoggedIn, checkConnection, function (req, res) {
+    app.get('/list-pacientes', general.isLoggedIn, function (req, res) {
         connection.query("CALL pacientes_listar()", function (err, result) {
             if (err) return res.json({ success: 0, error_msj: err });
             res.json({ success: 1, result });
@@ -119,7 +119,7 @@ module.exports = function (app,connection, passport) {
         });
     });
 
-    app.post('/insert-pacientes', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [102], connection) }, function (req, res) {
+    app.post('/insert-pacientes', bodyJson, general.isLoggedIn, (req, res, next) => { general.checkPermission(req, res, next, [102], connection) }, function (req, res) {
 		let id_cliente = req.body.id_cliente || null;
 		let id_clase = req.body.id_clase || null;
 		let id_especie = req.body.id_especie || null;
@@ -135,7 +135,7 @@ module.exports = function (app,connection, passport) {
 		})
 	});
 
-    app.get('/list-cliente', checkConnection, function (req, res) {
+    app.get('/list-cliente', general.isLoggedIn, function (req, res) {
 
 		connection.query("SELECT * FROM clientes WHERE estado = 1 ORDER BY APELLIDO, NOMBRE", function (err, result) {
 			if (err) {
@@ -148,7 +148,7 @@ module.exports = function (app,connection, passport) {
 		})
 	});
 
-	app.get('/list-clase', checkConnection, function (req, res) {
+	app.get('/list-clase', general.isLoggedIn, function (req, res) {
 
 		connection.query("SELECT * FROM clases WHERE estado = 1 ORDER BY DESCRIPCION", function (err, result) {
 			if (err) {
@@ -161,7 +161,7 @@ module.exports = function (app,connection, passport) {
 		})
 	});
 
-	app.get('/list-especie', checkConnection, function (req, res) {
+	app.get('/list-especie', general.isLoggedIn, function (req, res) {
 
 		connection.query("SELECT * FROM especies WHERE estado = 1 ORDER BY DESCRIPCION", function (err, result) {
 			if (err) {
@@ -174,7 +174,7 @@ module.exports = function (app,connection, passport) {
 		})
 	});
 
-	app.get('/list-especie-patologias', checkConnection, function (req, res) {
+	app.get('/list-especie-patologias', general.isLoggedIn, function (req, res) {
 
 		connection.query("SELECT * FROM especies WHERE estado = 1 OR id = 5 ORDER BY DESCRIPCION", function (err, result) {
 			if (err) {
@@ -187,7 +187,7 @@ module.exports = function (app,connection, passport) {
 		})
 	});
 
-	app.get('/list-raza', checkConnection, function (req, res) {
+	app.get('/list-raza', general.isLoggedIn, function (req, res) {
 
 		connection.query("SELECT * FROM razas WHERE estado = 1 ORDER BY DESCRIPCION", function (err, result) {
 			if (err) {
@@ -200,7 +200,7 @@ module.exports = function (app,connection, passport) {
 		})
 	});
 
-	app.get('/list-sexo', checkConnection, function (req, res) {
+	app.get('/list-sexo', general.isLoggedIn, function (req, res) {
 
 		connection.query("SELECT * FROM sexos WHERE estado = 1 ORDER BY DESCRIPCION", function (err, result) {
 			if (err) {
@@ -213,7 +213,7 @@ module.exports = function (app,connection, passport) {
 		})
 	});
 
-    app.get('/list-pacientes/:id', checkConnection, function (req, res) {
+    app.get('/list-pacientes/:id', general.isLoggedIn, function (req, res) {
 		var id = req.params.id;
 		connection.query("SELECT * FROM pacientes WHERE id = ? AND estado > 0", [id], function (err, result) {
 			if (err) return res.json({ success: 0, error_msj: err });
@@ -221,7 +221,7 @@ module.exports = function (app,connection, passport) {
 		});
 	});
 
-	app.post('/update-paciente', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [102], connection) }, function (req, res) {
+	app.post('/update-paciente', bodyJson, general.isLoggedIn, (req, res, next) => { general.checkPermission(req, res, next, [102], connection) }, function (req, res) {
 		if (req.body.id) {
 			let id = req.body.id || null;
 			let nombre = req.body.nombre || null;
@@ -251,7 +251,7 @@ module.exports = function (app,connection, passport) {
 		}
 	});
 
-    app.post('/delete-paciente', bodyJson, checkConnection, function (req, res) {
+    app.post('/delete-paciente', bodyJson, general.isLoggedIn, function (req, res) {
 		if (req.body.id) {
 			var id = parseInt(req.body.id);
 			var objectoUpdate = { estado: 0 };
@@ -266,7 +266,7 @@ module.exports = function (app,connection, passport) {
 		}
 	});
 
-	app.get('/list-alimentacion', checkConnection, function (req, res) {
+	app.get('/list-alimentacion', general.isLoggedIn, function (req, res) {
 
 		connection.query("SELECT * FROM pacientes_alimentacion WHERE estado = 1 ORDER BY DESCRIPCION", function (err, result) {
 			if (err) {
@@ -279,7 +279,7 @@ module.exports = function (app,connection, passport) {
 		})
 	});
 
-	app.get('/list-habitos', checkConnection, function (req, res) {
+	app.get('/list-habitos', general.isLoggedIn, function (req, res) {
 
 		connection.query("SELECT * FROM pacientes_habitos WHERE estado = 1 ORDER BY DESCRIPCION", function (err, result) {
 			if (err) {
@@ -292,7 +292,7 @@ module.exports = function (app,connection, passport) {
 		})
 	});
 
-	app.get('/list-mascotas', checkConnection, function (req, res) {
+	app.get('/list-mascotas', general.isLoggedIn, function (req, res) {
 
 		connection.query("SELECT * FROM pacientes_mascotas WHERE estado = 1 ORDER BY DESCRIPCION", function (err, result) {
 			if (err) {
@@ -305,7 +305,7 @@ module.exports = function (app,connection, passport) {
 		})
 	});
 
-	app.get('/list-especies_por_clase/:id_clase', function (req, res) {
+	app.get('/list-especies_por_clase/:id_clase', general.isLoggedIn, function (req, res) {
 		var id_clase = parseInt(req.params.id_clase) || 0;
 		console.log(id_clase);
 		connection.query("CALL especies_listar_por_clase(?)", [id_clase], function (err, result) {
@@ -316,7 +316,7 @@ module.exports = function (app,connection, passport) {
 
 	});
 	
-	app.get('/list-razas_por_especie/:id_especie', function (req, res) {
+	app.get('/list-razas_por_especie/:id_especie', general.isLoggedIn, function (req, res) {
 		var id_especie = parseInt(req.params.id_especie) || 0;
 		console.log(id_especie);
 		connection.query("CALL razas_listar_por_especie(?)", [id_especie], function (err, result) {
@@ -331,14 +331,14 @@ module.exports = function (app,connection, passport) {
     /*CLASES*/
     /********************************* */
 
-    app.get('/list-clases', isLoggedIn, checkConnection, function (req, res) {
+    app.get('/list-clases', general.isLoggedIn, function (req, res) {
         connection.query("SELECT * FROM clases WHERE estado = 1 ORDER BY descripcion", function (err, result) {
             if (err) return res.json({ success: 0, error_msj: err });
             res.json({ success: 1, result });
         });
     });
 
-    app.post('/insert-clases', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [105], connection) }, function (req, res) {
+    app.post('/insert-clases', bodyJson, general.isLoggedIn, (req, res, next) => { general.checkPermission(req, res, next, [105], connection) }, function (req, res) {
 		var arrayIns = [req.body.descripcion, 1];
 		connection.query("CALL clases_insertar(?)",  [arrayIns], function (err, result) {
 			if (err) return res.json({ success: 0, error_msj: err.message, err });
@@ -346,7 +346,7 @@ module.exports = function (app,connection, passport) {
 		})
 	});
 
-    app.post('/delete-clase', bodyJson, checkConnection, function (req, res) {
+    app.post('/delete-clase', bodyJson, general.isLoggedIn, function (req, res) {
 		if (req.body.id) {
 			var id = parseInt(req.body.id);
 			var objectoUpdate = { estado: 0 };
@@ -361,7 +361,7 @@ module.exports = function (app,connection, passport) {
 		}
 	});
 
-    app.get('/list-clases/:id', checkConnection, function (req, res) {
+    app.get('/list-clases/:id', general.isLoggedIn, function (req, res) {
 		var id = req.params.id;
 		connection.query("SELECT * FROM clases WHERE id = ? AND estado > 0", [id], function (err, result) {
 			if (err) return res.json({ success: 0, error_msj: err });
@@ -369,7 +369,7 @@ module.exports = function (app,connection, passport) {
 		});
 	});
 
-	app.post('/update-clase', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [105], connection) }, function (req, res) {
+	app.post('/update-clase', bodyJson, general.isLoggedIn, (req, res, next) => { general.checkPermission(req, res, next, [105], connection) }, function (req, res) {
 		if (req.body.id) {
 			let id = req.body.id || null;
 			let descripcion = req.body.descripcion || null;
@@ -389,14 +389,14 @@ module.exports = function (app,connection, passport) {
     /*ESPECIES*/
     /********************************* */
 
-    app.get('/list-especies', isLoggedIn, checkConnection, function (req, res) {
+    app.get('/list-especies', general.isLoggedIn, function (req, res) {
         connection.query("SELECT e.*, c.descripcion as 'nombreclase' FROM especies e INNER JOIN clases c ON c.id = e.id_clase WHERE e.estado = 1  ORDER BY e.descripcion", function (err, result) {
             if (err) return res.json({ success: 0, error_msj: err });
             res.json({ success: 1, result });
         });
     });
 
-    app.post('/insert-especies', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [103], connection) }, function (req, res) {
+    app.post('/insert-especies', bodyJson, general.isLoggedIn, (req, res, next) => { general.checkPermission(req, res, next, [103], connection) }, function (req, res) {
 		let id_clase = req.body.id_clase || null;
 		var arrayIns = [req.body.descripcion, id_clase, 1];
 		connection.query("CALL especies_insertar(?)",  [arrayIns], function (err, result) {
@@ -405,7 +405,7 @@ module.exports = function (app,connection, passport) {
 		})
 	});
 
-    app.post('/delete-especie', bodyJson, checkConnection, function (req, res) {
+    app.post('/delete-especie', bodyJson, general.isLoggedIn, function (req, res) {
 		if (req.body.id) {
 			var id = parseInt(req.body.id);
 			var objectoUpdate = { estado: 0 };
@@ -420,7 +420,7 @@ module.exports = function (app,connection, passport) {
 		}
 	});
 
-    app.get('/list-especies/:id', checkConnection, function (req, res) {
+    app.get('/list-especies/:id', general.isLoggedIn, function (req, res) {
 		var id = req.params.id;
 		connection.query("SELECT * FROM especies WHERE id = ? AND estado > 0", [id], function (err, result) {
 			if (err) return res.json({ success: 0, error_msj: err });
@@ -428,7 +428,7 @@ module.exports = function (app,connection, passport) {
 		});
 	});
 
-	app.post('/update-especie', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [103], connection) }, function (req, res) {
+	app.post('/update-especie', bodyJson, general.isLoggedIn, (req, res, next) => { general.checkPermission(req, res, next, [103], connection) }, function (req, res) {
 		if (req.body.id) {
 			let id = req.body.id || null;
 			let descripcion = req.body.descripcion || null;
@@ -449,14 +449,14 @@ module.exports = function (app,connection, passport) {
     /*RAZAS*/
     /********************************* */
 
-    app.get('/list-razas', isLoggedIn, checkConnection, function (req, res) {
+    app.get('/list-razas', general.isLoggedIn, function (req, res) {
         connection.query("SELECT r.*, e.descripcion as 'nombreespecie' FROM razas r INNER JOIN especies e ON e.id = r.id_especie WHERE r.estado = 1  ORDER BY r.descripcion", function (err, result) {
             if (err) return res.json({ success: 0, error_msj: err });
             res.json({ success: 1, result });
         });
     });
 
-    app.post('/insert-razas', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [103], connection) }, function (req, res) {
+    app.post('/insert-razas', bodyJson, general.isLoggedIn, (req, res, next) => { general.checkPermission(req, res, next, [103], connection) }, function (req, res) {
 		let id_especie = req.body.id_especie || null;
 		var arrayIns = [req.body.descripcion, id_especie, 1];
 		connection.query("CALL razas_insertar(?)",  [arrayIns], function (err, result) {
@@ -465,7 +465,7 @@ module.exports = function (app,connection, passport) {
 		})
 	});
 
-    app.post('/delete-raza', bodyJson, checkConnection, function (req, res) {
+    app.post('/delete-raza', bodyJson, general.isLoggedIn, function (req, res) {
 		if (req.body.id) {
 			var id = parseInt(req.body.id);
 			var objectoUpdate = { estado: 0 };
@@ -480,7 +480,7 @@ module.exports = function (app,connection, passport) {
 		}
 	});
 
-    app.get('/list-razas/:id', checkConnection, function (req, res) {
+    app.get('/list-razas/:id', general.isLoggedIn, function (req, res) {
 		var id = req.params.id;
 		connection.query("SELECT * FROM razas WHERE id = ? AND estado > 0", [id], function (err, result) {
 			if (err) return res.json({ success: 0, error_msj: err });
@@ -488,7 +488,7 @@ module.exports = function (app,connection, passport) {
 		});
 	});
 
-	app.post('/update-raza', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [103], connection) }, function (req, res) {
+	app.post('/update-raza', bodyJson, general.isLoggedIn, (req, res, next) => { general.checkPermission(req, res, next, [103], connection) }, function (req, res) {
 		if (req.body.id) {
 			let id = req.body.id || null;
 			let descripcion = req.body.descripcion || null;
@@ -509,7 +509,7 @@ module.exports = function (app,connection, passport) {
     /*PATOLOGIAS*/
     /********************************* */
 
-    app.get('/list-patologias', isLoggedIn, checkConnection, function (req, res) {
+    app.get('/list-patologias', general.isLoggedIn, function (req, res) {
 		connection.query("SELECT p.*, e.descripcion as 'nombreespecie' FROM patologias p INNER JOIN especies e ON e.id = p.id_especie WHERE p.estado = 1  ORDER BY p.descripcion", function (err, result) {
         //connection.query("SELECT * FROM patologias WHERE estado = 1 ORDER BY descripcion", function (err, result) {
             if (err) return res.json({ success: 0, error_msj: err });
@@ -517,7 +517,7 @@ module.exports = function (app,connection, passport) {
         });
     });
 
-    app.post('/insert-patologias', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [106], connection) }, function (req, res) {
+    app.post('/insert-patologias', bodyJson, general.isLoggedIn, (req, res, next) => { general.checkPermission(req, res, next, [106], connection) }, function (req, res) {
 		let id_especie = req.body.id_especie || null;
 		var arrayIns = [req.body.descripcion, id_especie, 1];
 		connection.query("CALL patologias_insertar(?)",  [arrayIns], function (err, result) {
@@ -526,7 +526,7 @@ module.exports = function (app,connection, passport) {
 		})
 	});
 
-    app.post('/delete-patologia', bodyJson, checkConnection, function (req, res) {
+    app.post('/delete-patologia', bodyJson, general.isLoggedIn, function (req, res) {
 		if (req.body.id) {
 			var id = parseInt(req.body.id);
 			var objectoUpdate = { estado: 0 };
@@ -541,7 +541,7 @@ module.exports = function (app,connection, passport) {
 		}
 	});
 
-    app.get('/list-patologias/:id', checkConnection, function (req, res) {
+    app.get('/list-patologias/:id', general.isLoggedIn, function (req, res) {
 		var id = req.params.id;
 		connection.query("SELECT * FROM patologias WHERE id = ? AND estado > 0", [id], function (err, result) {
 			if (err) return res.json({ success: 0, error_msj: err });
@@ -549,7 +549,7 @@ module.exports = function (app,connection, passport) {
 		});
 	});
 
-	app.post('/update-patologia', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [106], connection) }, function (req, res) {
+	app.post('/update-patologia', bodyJson, general.isLoggedIn, (req, res, next) => { general.checkPermission(req, res, next, [106], connection) }, function (req, res) {
 		if (req.body.id) {
 			let id = req.body.id || null;
 			let descripcion = req.body.descripcion || null;
@@ -570,14 +570,14 @@ module.exports = function (app,connection, passport) {
     /*SERVICIOS*/
     /********************************* */
 
-    app.get('/list-servicios', isLoggedIn, checkConnection, function (req, res) {
+    app.get('/list-servicios', general.isLoggedIn, function (req, res) {
         connection.query("SELECT * FROM servicios WHERE estado = 1 ORDER BY codigo", function (err, result) {
             if (err) return res.json({ success: 0, error_msj: err });
             res.json({ success: 1, result });
         });
     });
 
-    app.post('/insert-servicios', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [108], connection) }, function (req, res) {
+    app.post('/insert-servicios', bodyJson, general.isLoggedIn, (req, res, next) => { general.checkPermission(req, res, next, [107], connection) }, function (req, res) {
 		var arrayIns = [req.body.codigo, req.body.descripcion, req.body.tratamiento, req.body.consulta, 1];
 		connection.query("CALL servicios_insertar(?)",  [arrayIns], function (err, result) {
 			if (err) return res.json({ success: 0, error_msj: err.message, err });
@@ -585,7 +585,7 @@ module.exports = function (app,connection, passport) {
 		})
 	});
 
-    app.post('/delete-servicio', bodyJson, checkConnection, function (req, res) {
+    app.post('/delete-servicio', bodyJson, general.isLoggedIn, function (req, res) {
 		if (req.body.id) {
 			var id = parseInt(req.body.id);
 			var objectoUpdate = { estado: 0 };
@@ -600,7 +600,7 @@ module.exports = function (app,connection, passport) {
 		}
 	});
 
-    app.get('/list-servicios/:id', checkConnection, function (req, res) {
+    app.get('/list-servicios/:id', general.isLoggedIn, function (req, res) {
 		var id = req.params.id;
 		connection.query("SELECT * FROM servicios WHERE id = ? AND estado > 0", [id], function (err, result) {
 			if (err) return res.json({ success: 0, error_msj: err });
@@ -608,7 +608,7 @@ module.exports = function (app,connection, passport) {
 		});
 	});
 
-	app.post('/update-servicio', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [108], connection) }, function (req, res) {
+	app.post('/update-servicio', bodyJson, general.isLoggedIn, (req, res, next) => { general.checkPermission(req, res, next, [107], connection) }, function (req, res) {
 		if (req.body.id) {
 			let id = req.body.id || null;
 			let codigo = req.body.codigo || null;
@@ -631,7 +631,7 @@ module.exports = function (app,connection, passport) {
     /*CONSULTAS*/
     /********************************* */
 
-    app.get('/list-consultas', isLoggedIn, checkConnection, function (req, res) {
+    app.get('/list-consultas', general.isLoggedIn, function (req, res) {
         connection.query("CALL consultas_listar()", function (err, result) {
             if (err) return res.json({ success: 0, error_msj: err });
             res.json({ success: 1, result });
@@ -639,7 +639,7 @@ module.exports = function (app,connection, passport) {
         });
     });
 
-    app.post('/insert-consultas', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [107], connection) }, function (req, res) {
+    app.post('/insert-consultas', bodyJson, general.isLoggedIn, (req, res, next) => { general.checkPermission(req, res, next, [108], connection) }, function (req, res) {
 		let id_paciente = req.body.idPaciente || null;
 		let id_servicio = req.body.id_servicio || null;
 		let id_signos = req.body.id_signos || null;
@@ -649,13 +649,13 @@ module.exports = function (app,connection, passport) {
 		let id_pronostico = req.body.id_pronostico || null;
 		let id_diag_definitivo = req.body.id_diag_definitivo || null;
 		var arrayIns = [id_paciente, id_servicio, req.body.temperatura, req.body.peso, id_sensorio, id_mucosa, req.body.tllc, req.body.frecuencia_cardiaca, req.body.frecuencia_respiratoria, req.body.ganglios, req.body.anexos_cutaneos, /*req.body.consulta,*/ req.body.fecha, id_signos, req.body.anamnesis,req.body.examen_objetivo_particular, req.body.diag_complementarios, id_diag_presuntivo, req.body.tratamiento, id_pronostico, id_diag_definitivo, req.body.informe_diagnostico, req.body.observaciones,1];
-		connection.query("CALL consultas_insertar(?)",  [arrayIns], function (err, result) {
+		connection.query("CALL consultas_insertar_new2(?)",  [arrayIns], function (err, result) {
 			if (err) return res.json({ success: 0, error_msj: err.message, err });
 			res.json({ success: 1, result });
 		})
 	});
 
-	app.get('/list-servicio', checkConnection, function (req, res) {
+	app.get('/list-servicio', general.isLoggedIn, function (req, res) {
 
 		connection.query("SELECT * FROM servicios WHERE estado = 1 ORDER BY codigo", function (err, result) {
 			if (err) {
@@ -668,7 +668,7 @@ module.exports = function (app,connection, passport) {
 		})
 	});
 
-	app.get('/list-paciente/:idPaciente', checkConnection, function (req, res) {
+	app.get('/list-paciente/:idPaciente', general.isLoggedIn, function (req, res) {
 
 		var idPaciente = req.params.idPaciente;
 		let arrayIns = [idPaciente]
@@ -679,7 +679,7 @@ module.exports = function (app,connection, passport) {
 		});
 	});
 
-    app.post('/delete-consulta', bodyJson, checkConnection, function (req, res) {
+    app.post('/delete-consulta', bodyJson, general.isLoggedIn, function (req, res) {
 		if (req.body.id) {
 			var id = parseInt(req.body.id);
 			var objectoUpdate = { estado: 0 };
@@ -694,7 +694,7 @@ module.exports = function (app,connection, passport) {
 		}
 	});
 
-    app.get('/list-consultas/:id', checkConnection, function (req, res) {
+    app.get('/list-consultas/:id', general.isLoggedIn, function (req, res) {
 		var id = req.params.id;
 		connection.query("SELECT c.*, s.tratamiento as 'checktratamiento', s.consulta as 'checkconsulta' FROM consultas c INNER JOIN servicios s ON c.id_servicio = s.id  WHERE c.id = ? AND c.estado > 0", [id], function (err, result) {
 			if (err) return res.json({ success: 0, error_msj: err });
@@ -702,7 +702,7 @@ module.exports = function (app,connection, passport) {
 		});
 	});
 
-	app.post('/update-consulta', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [107], connection) }, function (req, res) {
+	app.post('/update-consulta', bodyJson, general.isLoggedIn, (req, res, next) => { general.checkPermission(req, res, next, [108], connection) }, function (req, res) {
 		if (req.body.id) {
 			let id = req.body.id || null;
 			let id_servicio = req.body.id_servicio || null;
@@ -729,7 +729,7 @@ module.exports = function (app,connection, passport) {
 			let observaciones = req.body.observaciones || null;
 
 			let arrayIns = [id, id_servicio, temperatura, peso, id_sensorio, id_mucosa, tllc, frecuencia_cardiaca, frecuencia_respiratoria, ganglios, anexos_cutaneos, /*consulta,*/ fecha, id_signos, anamnesis, examen_objetivo_particular, diag_complementarios, id_diag_presuntivo, tratamiento, id_pronostico, id_diag_definitivo, informe_diagnostico, observaciones];
-			connection.query("CALL consultas_update(?)",  [arrayIns], function (err, result) {
+			connection.query("CALL consultas_update_new2(?)",  [arrayIns], function (err, result) {
 				if (err) return res.json({ success: 0, error_msj: err.message, err });
 				res.json({ success: 1, result });
 			})
@@ -739,7 +739,7 @@ module.exports = function (app,connection, passport) {
 		}
 	});
 
-	app.post('/insert-archivo-consulta/:id/:nombre_foto', function (req, res) {
+	app.post('/insert-archivo-consulta/:id/:nombre_foto', general.isLoggedIn, function (req, res) {
 
 		var id = req.params.id;
 		var nombre_foto = req.params.nombre_foto;
@@ -782,7 +782,7 @@ module.exports = function (app,connection, passport) {
 
 	});
 
-	app.post('/delete-archivo-consulta', bodyJson, checkConnection, function (req, res) {
+	app.post('/delete-archivo-consulta', bodyJson, general.isLoggedIn, function (req, res) {
 
 		if (req.body.id) {
 			var id = parseInt(req.body.id);
@@ -796,7 +796,7 @@ module.exports = function (app,connection, passport) {
 		}
 	});
 
-	app.post('/insert-archivo-new-consulta/:id/:nombre_foto', function (req, res) {
+	app.post('/insert-archivo-new-consulta/:id/:nombre_foto', general.isLoggedIn, function (req, res) {
 		console.log("ID:" + req.params.id);
 		var id = req.params.id || 0;
 		var nombre_foto = req.params.nombre_foto;
@@ -846,7 +846,7 @@ module.exports = function (app,connection, passport) {
 
 	});
 
-	app.post('/insert-consultas-archivo-subido', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [108], connection) }, function (req, res) {
+	app.post('/insert-consultas-archivo-subido', bodyJson, general.isLoggedIn, (req, res, next) => { general.checkPermission(req, res, next, [108], connection) }, function (req, res) {
 		let id_paciente = req.body.idPaciente || null;
 		let id_servicio = req.body.id_servicio || null;
 		let id_signos = req.body.id_signos || null;
@@ -866,7 +866,7 @@ module.exports = function (app,connection, passport) {
 		})
 	});
 
-	app.get('/list-signo', checkConnection, function (req, res) {
+	app.get('/list-signo', general.isLoggedIn, function (req, res) {
 
 		connection.query("SELECT * FROM signos_sintomas WHERE estado = 1 ORDER BY descripcion", function (err, result) {
 			if (err) {
@@ -879,7 +879,7 @@ module.exports = function (app,connection, passport) {
 		})
 	});
 
-	app.get('/list-sensorio', checkConnection, function (req, res) {
+	app.get('/list-sensorio', general.isLoggedIn, function (req, res) {
 
 		connection.query("SELECT * FROM consultas_sensorios WHERE estado = 1 ORDER BY descripcion", function (err, result) {
 			if (err) {
@@ -892,7 +892,7 @@ module.exports = function (app,connection, passport) {
 		})
 	});
 
-	app.get('/list-mucosa', checkConnection, function (req, res) {
+	app.get('/list-mucosa', general.isLoggedIn, function (req, res) {
 
 		connection.query("SELECT * FROM consultas_mucosas WHERE estado = 1 ORDER BY descripcion", function (err, result) {
 			if (err) {
@@ -905,7 +905,7 @@ module.exports = function (app,connection, passport) {
 		})
 	});
 
-	app.get('/list-pronostico', checkConnection, function (req, res) {
+	app.get('/list-pronostico', general.isLoggedIn, function (req, res) {
 
 		connection.query("SELECT * FROM consultas_pronosticos WHERE estado = 1 ORDER BY descripcion", function (err, result) {
 			if (err) {
@@ -918,7 +918,7 @@ module.exports = function (app,connection, passport) {
 		})
 	});
 
-	app.get('/list-patologia/:idEspecie', checkConnection, function (req, res) {
+	app.get('/list-patologia/:idEspecie', general.isLoggedIn, function (req, res) {
 		var id = req.params.idEspecie;
 		connection.query("SELECT p.* FROM patologias p LEFT JOIN especies e ON e.id = p.id_especie LEFT JOIN pacientes pa ON pa.id_especie = e.id WHERE p.estado = 1 AND pa.id = ?  OR e.id = 5 ORDER BY p.descripcion", [id],function (err, result) {
 			if (err) {
@@ -931,7 +931,7 @@ module.exports = function (app,connection, passport) {
 		})
 	});
 
-	app.get('/list-patologia-consulta/:idConsulta', checkConnection, function (req, res) {
+	app.get('/list-patologia-consulta/:idConsulta', general.isLoggedIn, function (req, res) {
 		var id = req.params.idConsulta;
 		connection.query("SELECT p.* FROM patologias p LEFT JOIN especies e ON e.id = p.id_especie LEFT JOIN pacientes pa ON pa.id_especie = e.id	LEFT JOIN consultas c ON c.id_paciente = pa.id	WHERE p.estado = 1 AND c.id = ?	OR e.id = 5 ORDER BY p.descripcion;", [id],function (err, result) {
 			if (err) {
@@ -948,7 +948,7 @@ module.exports = function (app,connection, passport) {
     /*CONSULTAS*/
     /********************************* */
 
-	// app.get('/list-fichas', isLoggedIn, checkConnection, function (req, res) {
+	// app.get('/list-fichas', general.isLoggedIn, checkConnection, function (req, res) {
     //     connection.query("CALL pacientes_listar()", function (err, result) {
     //         if (err) return res.json({ success: 0, error_msj: err });
     //         res.json({ success: 1, result });
@@ -956,7 +956,7 @@ module.exports = function (app,connection, passport) {
     //     });
     // });
 
-	app.get('/list-fichas/:id', checkConnection, function (req, res) {
+	app.get('/list-fichas/:id', general.isLoggedIn, function (req, res) {
 		var id = req.params.id;
 		connection.query("CALL fichas_listar(?)", [id], function (err, result) {
 			if (err) return res.json({ success: 0, error_msj: err });
@@ -964,7 +964,7 @@ module.exports = function (app,connection, passport) {
 		});
 	});
 /*
-	app.get('/list-fichas', isLoggedIn, checkConnection, function (req, res) {
+	app.get('/list-fichas', general.isLoggedIn, checkConnection, function (req, res) {
         connection.query("CALL fichas_listar(2)", function (err, result) {
             if (err) return res.json({ success: 0, error_msj: err });
             res.json({ success: 1, result });
@@ -977,14 +977,14 @@ module.exports = function (app,connection, passport) {
     /*SIGNOS Y SINTOMAS*/
     /********************************* */
 
-    app.get('/list-signos', isLoggedIn, checkConnection, function (req, res) {
+    app.get('/list-signos', general.isLoggedIn, function (req, res) {
         connection.query("SELECT * FROM signos_sintomas WHERE estado = 1 ORDER BY descripcion", function (err, result) {
             if (err) return res.json({ success: 0, error_msj: err });
             res.json({ success: 1, result });
         });
     });
 
-    app.post('/insert-signos', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [105], connection) }, function (req, res) {
+    app.post('/insert-signos', bodyJson, general.isLoggedIn, (req, res, next) => { general.checkPermission(req, res, next, [105], connection) }, function (req, res) {
 		var arrayIns = [req.body.descripcion, 1];
 		connection.query("CALL signos_sintomas_insertar(?)",  [arrayIns], function (err, result) {
 			if (err) return res.json({ success: 0, error_msj: err.message, err });
@@ -992,7 +992,7 @@ module.exports = function (app,connection, passport) {
 		})
 	});
 
-    app.post('/delete-signo', bodyJson, checkConnection, function (req, res) {
+    app.post('/delete-signo', bodyJson, general.isLoggedIn, function (req, res) {
 		if (req.body.id) {
 			var id = parseInt(req.body.id);
 			var objectoUpdate = { estado: 0 };
@@ -1007,7 +1007,7 @@ module.exports = function (app,connection, passport) {
 		}
 	});
 
-    app.get('/list-signos/:id', checkConnection, function (req, res) {
+    app.get('/list-signos/:id', general.isLoggedIn, function (req, res) {
 		var id = req.params.id;
 		connection.query("SELECT * FROM signos_sintomas WHERE id = ? AND estado > 0", [id], function (err, result) {
 			if (err) return res.json({ success: 0, error_msj: err });
@@ -1015,7 +1015,7 @@ module.exports = function (app,connection, passport) {
 		});
 	});
 
-	app.post('/update-signo', bodyJson, checkConnection, (req, res, next) => { general.checkPermission(req, res, next, [105], connection) }, function (req, res) {
+	app.post('/update-signo', bodyJson, general.isLoggedIn, (req, res, next) => { general.checkPermission(req, res, next, [105], connection) }, function (req, res) {
 		if (req.body.id) {
 			let id = req.body.id || null;
 			let descripcion = req.body.descripcion || null;
